@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.12"
 imageio = "^2.36.0"
 ruff = "^0.7.1"
+bitarray = "^3.0.0"
 
 
 [build-system]
