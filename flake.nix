@@ -22,6 +22,7 @@
           python312Packages.numpy
           python312Packages.imageio
           python312Packages.bitarray
+          python312Packages.pytest
         ];
       };
     });
