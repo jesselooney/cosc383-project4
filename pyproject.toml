@@ -2,7 +2,7 @@
 name = "stegtools"
 version = "0.1.0"
 description = ""
-authors = ["Jesse Looney <42242696+jesselooney@users.noreply.github.com>"]
+authors = ["Jesse Looney <42242696+jesselooney@users.noreply.github.com>", "BattleCh1cken"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
