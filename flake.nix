@@ -23,6 +23,7 @@
           python312Packages.imageio
           python312Packages.bitarray
           python312Packages.pytest
+          python312Packages.pillow
           ruff
         ];
       };
