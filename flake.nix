@@ -19,6 +19,9 @@
         packages = with pkgs; [
           python312
           poetry
+          python312Packages.numpy
+          python312Packages.imageio
+          python312Packages.bitarray
         ];
       };
     });
