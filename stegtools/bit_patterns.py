@@ -4,7 +4,12 @@ from bitarray import bitarray
 
 
 def transject(image: np.ndarray, pattern: callable, message: bitarray) -> int:
-    """Contains the logic wrapped by the inject and eject functions.
+    """Contains the logic wrapped by the `inject` and `eject` functions. Not meant to be called directly.
+
+    This function puts all of the bits in the `message` into `image` at all the locations specified by the
+    `pattern`, and then edits the `message` in place to contain all of the bits that it overwrote when manipulating
+    `image`. This allows the function to be used both to place data inside the image at specific points but also to
+    request data as well.
 
     Args:
         image: The image to be manipulated. Will be edited in place.
