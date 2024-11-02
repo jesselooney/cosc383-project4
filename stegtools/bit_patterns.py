@@ -4,7 +4,7 @@ from bitarray import bitarray
 
 
 def transject(image: np.ndarray, pattern: callable, message: bitarray) -> int:
-    it = np.nditer(image, order='C', flags=['multi_index'])
+    it = np.nditer(image, order="C", flags=["multi_index"])
 
     message_index = 0
 
@@ -12,7 +12,7 @@ def transject(image: np.ndarray, pattern: callable, message: bitarray) -> int:
         if message_index >= len(message):
             break
 
-        bits = bitarray(endian='little')
+        bits = bitarray(endian="little")
         bits.frombytes(int(subpixel).to_bytes())
 
         for i, bit in enumerate(bits):
@@ -28,7 +28,9 @@ def transject(image: np.ndarray, pattern: callable, message: bitarray) -> int:
         image[*it.multi_index] = new_subpixel
 
     if message_index < len(message):
-        print(f'WARNING: Length mismatch: {len(message)} message bits but only {message_index} suitable bits were found in cover image.')
+        print(
+            f"WARNING: Length mismatch: {len(message)} message bits but only {message_index} suitable bits were found in cover image."
+        )
 
     return message_index
 
@@ -46,5 +48,3 @@ def eject(image: np.ndarray, pattern: callable, length: int = -1) -> bitarray:
     message = bitarray(length)
     true_length = transject(image.copy(), pattern, message)
     return message[:true_length]
-
-
