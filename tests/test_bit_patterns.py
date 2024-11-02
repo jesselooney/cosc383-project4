@@ -39,6 +39,4 @@ def test_inject_eject_invertible():
     assert not np.array_equal(modified_img, img), 'injection should modify the image'
 
     parsed_msg = eject(modified_img, pattern, 100_000)
-    assert parsed_msg == msg, 'Should be reversible'
-
-
+    assert parsed_msg == msg, 'ejecting the injected image should retrieve the original message'
