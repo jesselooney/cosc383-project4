@@ -25,6 +25,7 @@
         dbus.dev
 
         pkg-config
+        fontconfig
         rust-bin.nightly.latest.default
         rust-analyzer
       ];
