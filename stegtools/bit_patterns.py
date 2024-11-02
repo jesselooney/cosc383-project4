@@ -4,10 +4,10 @@ from bitarray import bitarray
 
 
 def transject(image: np.ndarray, pattern: callable, message: bitarray) -> int:
-    """Contains the log wrapped by the inject and eject functions
+    """Contains the logic wrapped by the inject and eject functions.
 
     Args:
-        image: The image to be manipulated
+        image: The image to be manipulated. Will be edited in place.
         pattern:
             A function that determines which bits in the image should be overwritten
             or returned.
@@ -35,7 +35,9 @@ def transject(image: np.ndarray, pattern: callable, message: bitarray) -> int:
             def pattern(row: int, col: int, chn: int, idx: int):
                 return idx == 0
             ```
-        message: The data to be encoded into the image, in binary form
+        message:
+            The data to be encoded into the image, in binary form.
+            Will be replaced with the data found at the location specified with the pattern.
 
     Returns: The number of bits of the message successfully encoded into the image
 
@@ -105,6 +107,8 @@ def eject(image: np.ndarray, pattern: callable, length: int = -1) -> bitarray:
             A function that dictates which bits to look for the message in
             See the documentation for `transject` for valid patterns
         length:
+            The length of the message being parsed out of the image.
+            Will default to looking in every bit in the image.
 
     Returns: the requested data
     """
