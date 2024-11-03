@@ -34,6 +34,19 @@ pub fn transject(mut image: RgbImage, pattern: Pattern, mut message: BitVec) -> 
     return (image, message);
 }
 
+pub fn inject(image: RgbImage, pattern: Pattern, message: BitVec) -> RgbImage {
+    // this is a very shallow interface but idk how much i care
+    let (image, _) = transject(image, pattern, message);
+    image
+}
+
+pub fn eject(image: RgbImage, pattern: Pattern, length: usize) -> BitVec {
+    let message = bitvec![u8, Lsb0;];
+
+    let (_, parsed_message) = transject(image, pattern, message);
+    parsed_message
+}
+
 pub mod patterns {
     pub fn access_all(row: u32, column: u32, channel: usize, index: usize) -> bool {
         true
@@ -71,5 +84,20 @@ mod tests {
     }
 
     #[test]
-    fn inject_eject_reversible() {}
+    fn inject_eject_reversible() {
+        let img: RgbImage = image::open("assets/blahaj-in-bando.png").unwrap().into();
+        let mut message = bitvec![usize, LocalBits; 0; 40];
+        message[0..10].store::<u16>(0x3A8);
+        message[10..20].store::<u16>(0x2F9);
+        message[20..30].store::<u16>(0x154);
+        message[30..40].store::<u16>(0x06D);
+
+        let modified_img = inject(img.clone(), patterns::access_all.clone(), message.clone());
+
+        assert_ne!(img, modified_img);
+
+        let restored_msg = eject(modified_img.clone(), patterns::access_all, 40);
+
+        assert_eq!(message, restored_msg);
+    }
 }
