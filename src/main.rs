@@ -1,5 +1,6 @@
 use std::time::SystemTime;
 mod bit_patterns;
+mod transform;
 use bit_patterns::transject;
 use bitvec::prelude::*;
 
