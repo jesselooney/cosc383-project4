@@ -41,7 +41,7 @@ pub fn inject(image: RgbImage, pattern: Pattern, message: BitVec) -> RgbImage {
 }
 
 pub fn eject(image: RgbImage, pattern: Pattern, length: usize) -> BitVec {
-    let message = bitvec![u8, Lsb0;];
+    let message = bitvec![usize, Lsb0; 0; length];
 
     let (_, parsed_message) = transject(image, pattern, message);
     parsed_message
