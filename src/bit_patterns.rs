@@ -1,5 +1,5 @@
 use bitvec::prelude::*;
-use image::{GenericImageView, ImageBuffer, Pixel, RgbImage};
+use image::{Pixel, RgbImage};
 
 type Pattern = fn(u32, u32, usize, usize) -> bool;
 
@@ -50,7 +50,7 @@ pub fn eject(image: RgbImage, pattern: Pattern, length: Option<usize>) -> BitVec
 }
 
 pub mod patterns {
-    pub fn access_all(row: u32, column: u32, channel: usize, index: usize) -> bool {
+    pub fn access_all(_row: u32, _column: u32, _channel: usize, _index: usize) -> bool {
         true
     }
 
