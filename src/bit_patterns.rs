@@ -40,7 +40,10 @@ pub fn inject(image: RgbImage, pattern: Pattern, message: BitVec) -> RgbImage {
     image
 }
 
-pub fn eject(image: RgbImage, pattern: Pattern, length: usize) -> BitVec {
+pub fn eject(image: RgbImage, pattern: Pattern, length: Option<usize>) -> BitVec {
+    let img_len = image.pixels().len();
+    let length = length.unwrap_or(img_len * 8);
+
     let message = bitvec![usize, Lsb0; 0; length];
 
     let (_, parsed_message) = transject(image, pattern, message);
@@ -96,7 +99,7 @@ mod tests {
 
         assert_ne!(img, modified_img);
 
-        let restored_msg = eject(modified_img.clone(), patterns::access_all, 40);
+        let restored_msg = eject(modified_img.clone(), patterns::access_all, Some(40));
 
         assert_eq!(message, restored_msg);
     }
