@@ -1,23 +1,20 @@
 use std::time::SystemTime;
 mod bit_patterns;
 mod transform;
-use bit_patterns::transject;
-use bitvec::prelude::*;
+use anyhow::Result;
 
-fn main() {
-    let img = image::open("blahaj-in-bando.png").unwrap();
+fn main() -> Result<()> {
+    let img = image::open("assets/hide_image.png").unwrap();
 
     let start = SystemTime::now();
 
-    let mut bits = bitvec![usize, LocalBits; 0; 40];
-    bits[0..10].store::<u16>(0x3A8);
-    bits[10..20].store::<u16>(0x2F9);
-    bits[20..30].store::<u16>(0x154);
-    bits[30..40].store::<u16>(0x06D);
-    println!("{:?}, {}", bits, bits.len());
-    //transject(img.into(), bit_patterns::patterns::access_all, bits);
+    let modified_img = transform::amplify_least_significant_bits(img.into());
+    modified_img.save("output.png")?;
+
     let end = SystemTime::now();
 
     let duration = end.duration_since(start).unwrap();
     println!("it took {} seconds", duration.as_secs());
+
+    Ok(())
 }

@@ -3,6 +3,12 @@ use image::{GenericImageView, ImageBuffer, Pixel, RgbImage};
 
 type Pattern = fn(u32, u32, usize, usize) -> bool;
 
+/// Contains the business logic for the `inject` and `eject` functions. This function is not meant to be called directly.
+///
+/// The function does these things:
+/// 1. Encodes the contents of `message` into `image`. The `pattern` dictates which bits of the image can be used.
+/// 2. Places all of the bits displaced by this encoding back into `message`
+/// 3. Returns the new `image` and `message` in a tuple.
 pub fn transject(mut image: RgbImage, pattern: Pattern, mut message: BitVec) -> (RgbImage, BitVec) {
     let mut message_index = 0;
     for (pixel_row, pixel_col, pixel) in &mut image.enumerate_pixels_mut() {

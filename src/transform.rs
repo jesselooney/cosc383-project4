@@ -1,4 +1,4 @@
-use crate::bit_patterns::{patterns, transject};
+use crate::bit_patterns::{eject, inject, patterns, transject};
 /// This file contains functions which will perform useful
 /// transformations on images.
 use bitvec::prelude::*;
@@ -7,9 +7,19 @@ use image::{GenericImageView, ImageBuffer, Pixel, RgbImage};
 /// This function amplifies the least significant bit of
 /// each channel so that hidden changes become more visible
 /// to the human eye.
-fn amplify_least_significant_bits(mut image: RgbImage) -> RgbImage {
-    //let least_significant_bits = 
-    image
+pub fn amplify_least_significant_bits(mut image: RgbImage) -> RgbImage {
+    let least_significant_bits =
+        eject(image.clone(), patterns::access_least_significant_bits, None);
+
+    let mut transformed_image_bits = bitvec!();
+
+    for bit in least_significant_bits {
+        transformed_image_bits.extend([bit; 8]);
+    }
+
+    let transformed_image = inject(image, patterns::access_all, transformed_image_bits);
+
+    transformed_image
 }
 
 #[cfg(test)]
