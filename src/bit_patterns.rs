@@ -54,6 +54,15 @@ pub mod patterns {
     pub fn access_all(row: u32, column: u32, channel: usize, index: usize) -> bool {
         true
     }
+
+    pub fn access_least_significant_bits(
+        _row: u32,
+        _column: u32,
+        _channel: usize,
+        index: usize,
+    ) -> bool {
+        index == 0
+    }
 }
 
 #[cfg(test)]
@@ -62,8 +71,10 @@ mod tests {
 
     #[test]
     fn transject_invertible() {
-        let img: RgbImage = image::open("assets/blahaj-in-bando.png").unwrap().into();
+        let img: RgbImage = image::open("assets/hide_text.png").unwrap().into();
 
+        // TODO: theres gotta be a better way to create a message
+        // ideally it'd be random and we'd run the test multiple times
         let mut message = bitvec![usize, LocalBits; 0; 40];
         message[0..10].store::<u16>(0x3A8);
         message[10..20].store::<u16>(0x2F9);
@@ -88,7 +99,7 @@ mod tests {
 
     #[test]
     fn inject_eject_reversible() {
-        let img: RgbImage = image::open("assets/blahaj-in-bando.png").unwrap().into();
+        let img: RgbImage = image::open("assets/hide_text.png").unwrap().into();
         let mut message = bitvec![usize, LocalBits; 0; 40];
         message[0..10].store::<u16>(0x3A8);
         message[10..20].store::<u16>(0x2F9);
@@ -102,5 +113,8 @@ mod tests {
         let restored_msg = eject(modified_img.clone(), patterns::access_all, Some(40));
 
         assert_eq!(message, restored_msg);
+
+        let incorrectly_restored_msg = eject(modified_img.clone(), patterns::access_all, Some(20));
+        assert_ne!(message, incorrectly_restored_msg);
     }
 }
