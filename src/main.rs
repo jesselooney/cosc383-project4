@@ -1,5 +1,6 @@
 use std::time::SystemTime;
 mod bit_patterns;
+mod detect;
 mod transform;
 use anyhow::Result;
 
