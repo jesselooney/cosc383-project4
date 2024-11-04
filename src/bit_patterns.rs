@@ -4,13 +4,6 @@ use image::{GenericImageView, ImageBuffer, Pixel, RgbImage};
 type Pattern = fn(u32, u32, usize, usize) -> bool;
 
 pub fn transject(mut image: RgbImage, pattern: Pattern, mut message: BitVec) -> (RgbImage, BitVec) {
-    /*
-    I need to
-    - iterate of the individual channels of the image
-    - check if the channel can be accessed with the pattern
-    - do the flipsy flipsy with the message
-    */
-
     let mut message_index = 0;
     for (pixel_row, pixel_col, pixel) in &mut image.enumerate_pixels_mut() {
         for (channel_index, channel_value) in &mut pixel.channels_mut().into_iter().enumerate() {
