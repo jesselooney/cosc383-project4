@@ -12,19 +12,27 @@ use bitvec::{
     bitvec,
     field::BitField,
     order::{Lsb0, Msb0},
+    vec::BitVec,
 };
 use image::RgbImage;
 
-pub fn get_width(row: u32, _column: u32, _channel: usize, index: usize) -> bool {
-    // the first 10 pixels + 2
-    if index == 0 && row <= 10 {
-        true
-    } else {
-        false
+pub fn flipsy_flipsy(mut input: BitVec<u8>) -> BitVec<u8> {
+    let mut result: BitVec<u8> = BitVec::new();
+
+    for i in 0..input.len() - 1 {
+        if i % 8 == 0 {
+            let mut tmp = input.drain(0..8).collect::<BitVec>();
+            tmp.reverse();
+            println!("{:?}", tmp);
+            result.extend(tmp);
+        }
     }
+
+    result
 }
 
 fn main() -> Result<()> {
+    /*
     let start = SystemTime::now();
     let img: RgbImage = image::open("assets/hide_text.png").unwrap().into();
     let transformed_img = transform::amplify_least_significant_bits(img.clone());
@@ -39,8 +47,9 @@ fn main() -> Result<()> {
     length_bits.reverse(); // no clue why i have to do this
     let length = length_bits.load::<usize>() + 32;
     println!("{length}");
-    let mut text_bits = eject(img, patterns::access_least_significant_bits, Some(length));
+    let mut text_bits = eject(img, patterns::access_least_significant_bits, Some(10000));
     text_bits = text_bits.split_off(32);
+    text_bits = flipsy_flipsy(text_bits);
     //text_bits.reverse();
 
     let mut file = File::create("output.txt")?;
@@ -48,45 +57,42 @@ fn main() -> Result<()> {
     let bits: &[u8] = text_bits.as_raw_slice();
 
     file.write_all(bits).unwrap();
-
-    /*
-        let img: RgbImage = image::open("assets/hide_image.png").unwrap().into();
-        let mut height_width_bits = eject(
-            img.clone(),
-            patterns::access_least_significant_bits,
-            Some(64),
-        );
-
-        println!("{:?}", height_width_bits);
-        height_width_bits.reverse(); // no clue why i have to do this
-        let width_bits = height_width_bits.split_off(32);
-        let height_bits = height_width_bits;
-        println!("{:?}", width_bits);
-        println!("{:?}", height_bits);
-
-        let height = height_bits.load::<usize>();
-        let width = width_bits.load::<usize>();
-        println!("height: {height}");
-        println!("height: {width}");
-
-        let total_pixels = height * width;
-        let length: usize = 64 + (total_pixels) * 3 * 8;
-        let mut image_bits = eject(img, patterns::access_least_significant_bits, Some(length));
-        image_bits = image_bits.split_off(64);
-        image_bits.reverse();
-        println!("{:?}", image_bits);
-
-        let mut file = File::create("output.png")?;
-
-        let bits: &[u8] = image_bits.as_raw_slice();
-
-        file.write_all(bits).unwrap();
-
     */
 
-    let end = SystemTime::now();
-    let duration = end.duration_since(start).unwrap();
-    println!("it took {} seconds", duration.as_secs());
+    let img: RgbImage = image::open("assets/hide_image.png").unwrap().into();
+    let mut height_width_bits = eject(
+        img.clone(),
+        patterns::access_least_significant_bits,
+        Some(64),
+    );
+
+    println!("{:?}", height_width_bits);
+    height_width_bits.reverse(); // no clue why i have to do this
+    let width_bits = height_width_bits.split_off(32);
+    let height_bits = height_width_bits;
+    println!("{:?}", width_bits);
+    println!("{:?}", height_bits);
+
+    let height = height_bits.load::<usize>();
+    let width = width_bits.load::<usize>();
+    println!("height: {height}");
+    println!("height: {width}");
+
+    let total_pixels = height * width;
+    let length: usize = 64 + (total_pixels) * 3 * 8;
+    let mut image_bits = eject(img, patterns::access_least_significant_bits, Some(length));
+    image_bits = image_bits.split_off(64);
+    image_bits = flipsy_flipsy(image_bits);
+
+    let mut file = File::create("output.png")?;
+
+    let bits: &[u8] = image_bits.as_raw_slice();
+
+    file.write_all(bits).unwrap();
+
+    //let end = SystemTime::now();
+    //let duration = end.duration_since(start).unwrap();
+    //println!("it took {} seconds", duration.as_secs());
 
     Ok(())
 }
