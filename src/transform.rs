@@ -11,7 +11,7 @@ pub fn amplify_least_significant_bits(image: RgbImage) -> RgbImage {
     let least_significant_bits =
         eject(image.clone(), patterns::access_least_significant_bits, None);
 
-    let mut transformed_image_bits = bitvec!();
+    let mut transformed_image_bits: BitVec<u8> = BitVec::new();
 
     for bit in least_significant_bits {
         transformed_image_bits.extend([bit; 8]);

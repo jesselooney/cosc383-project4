@@ -9,7 +9,11 @@ type Pattern = fn(u32, u32, usize, usize) -> bool;
 /// 1. Encodes the contents of `message` into `image`. The `pattern` dictates which bits of the image can be used.
 /// 2. Places all of the bits displaced by this encoding back into `message`
 /// 3. Returns the new `image` and `message` in a tuple.
-fn transject(mut image: RgbImage, pattern: Pattern, mut message: BitVec) -> (RgbImage, BitVec) {
+fn transject(
+    mut image: RgbImage,
+    pattern: Pattern,
+    mut message: BitVec<u8>,
+) -> (RgbImage, BitVec<u8>) {
     let mut message_index = 0;
     for (pixel_row, pixel_col, pixel) in &mut image.enumerate_pixels_mut() {
         for (channel_index, channel_value) in &mut pixel.channels_mut().into_iter().enumerate() {
@@ -33,17 +37,17 @@ fn transject(mut image: RgbImage, pattern: Pattern, mut message: BitVec) -> (Rgb
     return (image, message);
 }
 
-pub fn inject(image: RgbImage, pattern: Pattern, message: BitVec) -> RgbImage {
+pub fn inject(image: RgbImage, pattern: Pattern, message: BitVec<u8>) -> RgbImage {
     // this is a very shallow interface but idk how much i care
     let (image, _) = transject(image, pattern, message);
     image
 }
 
-pub fn eject(image: RgbImage, pattern: Pattern, length: Option<usize>) -> BitVec {
+pub fn eject(image: RgbImage, pattern: Pattern, length: Option<usize>) -> BitVec<u8> {
     let img_len = image.pixels().len();
     let length = length.unwrap_or(img_len * 8);
 
-    let message = bitvec![usize, Lsb0; 0; length];
+    let message = bitvec![u8, Lsb0; 0; length];
 
     let (_, parsed_message) = transject(image, pattern, message);
     parsed_message
@@ -74,7 +78,7 @@ mod tests {
 
         // TODO: theres gotta be a better way to create a message
         // ideally it'd be random and we'd run the test multiple times
-        let mut message = bitvec![usize, LocalBits; 0; 40];
+        let mut message = bitvec![u8, LocalBits; 0; 40];
         message[0..10].store::<u16>(0x3A8);
         message[10..20].store::<u16>(0x2F9);
         message[20..30].store::<u16>(0x154);
@@ -99,7 +103,7 @@ mod tests {
     #[test]
     fn inject_eject_reversible() {
         let img: RgbImage = image::open("assets/hide_text.png").unwrap().into();
-        let mut message = bitvec![usize, LocalBits; 0; 40];
+        let mut message = bitvec![u8, LocalBits; 0; 40];
         message[0..10].store::<u16>(0x3A8);
         message[10..20].store::<u16>(0x2F9);
         message[20..30].store::<u16>(0x154);
