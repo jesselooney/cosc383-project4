@@ -1,7 +1,9 @@
 use crate::bit_patterns::{eject, patterns};
-use bitvec::prelude::*;
+use bitvec::field::BitField;
 use image::RgbImage;
-use itertools::{iproduct, izip, Itertools};
+use itertools::izip;
+use itertools::Itertools;
+use std::fs;
 
 fn chi_squared(n: f32, observed_count: f32, prob: f32) -> f32 {
     let expected_count = n * prob;
@@ -9,105 +11,132 @@ fn chi_squared(n: f32, observed_count: f32, prob: f32) -> f32 {
     (h * h) / expected_count
 }
 
-fn detect() {
-    let image: RgbImage = image::open("assets/hide_text.png").unwrap().into();
-    let length = image.len() as usize;
-    let width = image.width() as usize;
-    let lsbs = eject(
-        image,
+fn block_frequencies(image: RgbImage) -> [f64; 4096] {
+    // Read the LSB of each channel of each pixel of `image`.
+    let least_significant_bits = eject(
+        image.clone(),
         patterns::access_least_significant_bits,
-        Some(length * 3),
+        Some(image.len() * 3),
     );
 
-    let pixels = lsbs.chunks_exact(3).map(|bs| bs.load::<u16>());
+    let pixels = least_significant_bits
+        .chunks_exact(3)
+        .map(BitField::load_le::<u16>);
 
+    let width = image.width() as usize;
+    // Create an iterator over every 2 by 2 block of pixels in `image`.
     let blocks = izip!(
         pixels.clone(),
         pixels.clone().skip(1),
         pixels.clone().skip(width),
         pixels.clone().skip(width + 1)
     );
+    let blocks_count = blocks.clone().count() as f64;
 
-    let mut nums = [0i32; 4096]; // each block of 4 pixels' lsbs is 12 bits so has values in [0, 4095]
-    let block_count = blocks
-        .map(|(a, b, c, d)| a | b << 3 | c << 6 | d << 9)
-        .map(|x| nums[x as usize] += 1)
-        .count();
+    // Allocate space for the 4096 kinds of block there are, where each kind of block is represented
+    // by a 12 bit number made by concatenating the bits of its component pixels.
+    let mut block_counts = [0f64; 4096];
+    for (w, x, y, z) in blocks {
+        let block_id = w | x << 3 | y << 6 | z << 9;
+        block_counts[block_id as usize] += 1f64;
+    }
 
-    let data: Vec<(i32, i32)> = nums
+    // Convert the counts into frequencies.
+    for block_id in 0..4096 {
+        block_counts[block_id] /= blocks_count;
+    }
+    block_counts
+}
+
+fn mean_sd(data: impl IntoIterator<Item = f64> + Clone) -> (f64, f64) {
+    let count = data.clone().into_iter().count() as f64;
+    let mean = data.clone().into_iter().sum::<f64>() / count;
+    let second_moment = data.into_iter().map(|x| x * x).sum::<f64>() / count;
+    let variance = second_moment - (mean * mean);
+    (mean, f64::sqrt(variance))
+}
+
+fn get_data() {
+    let paths = fs::read_dir("assets/plain/").unwrap();
+
+    let mut data: Vec<Vec<f64>> = vec![vec![]; 4096];
+
+    // WARN outdated! Thihs file now stores the transpose of this data: the frequencies of each
+    // block all together for each image.
+    // Accumulate a vector of observed block frequencies for each kind of block.
+    for path in paths {
+        let image: RgbImage = image::open(path.unwrap().path()).unwrap().into();
+        let block_frequencies = block_frequencies(image);
+        for (block_id, frequency) in block_frequencies.into_iter().enumerate() {
+            data[block_id].push(frequency);
+        }
+    }
+
+    let data_string = serde_json::to_string(&data).unwrap();
+    fs::write("plain_image_data.json", data_string).unwrap();
+}
+
+fn get_uniform_block_counts(block_counts: Vec<f64>) -> Vec<f64> {
+    let uniform_block_ids: Vec<usize> = (0..8).map(|x| x | x << 3 | x << 6 | x << 9).collect();
+    let uniform_block_counts: Vec<f64> = uniform_block_ids
         .into_iter()
+        .map(|id| block_counts[id])
+        .collect();
+    uniform_block_counts
+}
+
+fn analyze_data() {
+    let data_string = fs::read_to_string("assets/plain_image_data.json").unwrap();
+    let data: Vec<Vec<f64>> = serde_json::from_str(data_string.as_str()).unwrap();
+
+    let test_image: RgbImage = image::open("assets/hide_image-cropped.png").unwrap().into();
+    let test_block_frequencies = block_frequencies(test_image);
+
+    /*
+    // Transpose the data
+    let data: Vec<Vec<f64>> = (0..data_transpose[0].len())
+        .map(|observation_index| {
+            data_transpose
+                .clone()
+                .into_iter()
+                .map(|observations| observations[observation_index])
+                .collect()
+        })
+        .collect();*/
+
+    assert!(data.len() == 42);
+    assert!(data[0].len() == 4096);
+
+    let frequent_uniform_blocks: Vec<Vec<(usize, f64)>> = data
+        .into_iter()
+        .map(get_uniform_block_counts)
+        .map(|counts| {
+            counts
+                .into_iter()
+                .enumerate()
+                .sorted_by(|(_, x), (_, y)| y.partial_cmp(x).unwrap())
+                .collect_vec()
+        })
+        .collect();
+
+    println!("{:#?}", frequent_uniform_blocks);
+    println!(
+        "{:#?}",
+        get_uniform_block_counts(test_block_frequencies.to_vec())
+    );
+    println!("The uniform frequencies are of one tenth the order in the modified image versus baseline. This should be detectable!");
+    // Collect all block ids where each pixel (3 bits) has the same value.
+
+    /*
+    let stats: Vec<(f64, f64)> = data.into_iter().map(mean_sd).collect();
+    let relative_deviation: Vec<(usize, f64)> = stats
+        .into_iter()
+        .map(|(mean, sd)| sd / mean)
         .enumerate()
-        .map(|(i, c)| (i as i32, c))
-        .collect();
-
-    /*
-    let frequent_indices: Vec<(i32, i32)> =
-        data.clone().into_iter().filter(|(_, c)| *c > 100).collect();
-    */
-    let triple = 0b111;
-    let x = [0, triple, triple << 3, triple << 6, triple << 9];
-    let categories: Vec<i32> = iproduct!(x, x, x, x)
-        .map(|(a, b, c, d)| a | b | c | d)
-        .sorted()
-        .dedup()
-        .collect();
-
-    let counts: Vec<f32> = categories
-        .into_iter()
-        .map(|i| (nums[i as usize] as f32))
-        .collect();
-
-    let expected = [
-        0.68328524,
-        0.002058274,
-        0.002076119,
-        0.0026780632,
-        0.0020882566,
-        0.0027571998,
-        0.0012078274,
-        0.0020403487,
-        0.0020475832,
-        0.0012076666,
-        0.0027619423,
-        0.0020643028,
-        0.002660138,
-        0.002068161,
-        0.002040389,
-        0.017025694,
-    ];
-
-    let expected_counts: Vec<f32> = expected
-        .into_iter()
-        .map(|x| x * (block_count as f32))
-        .collect();
-
-    let chi_stat: f32 = izip!(counts.clone(), expected)
-        .map(|(o, p)| chi_squared(block_count as f32, o, p))
-        .sum();
-    /*
-        let drawing_area = SVGBackend::new("histogram_vertical.svg", (1000, 1000)).into_drawing_area();
-        drawing_area.fill(&WHITE).unwrap();
-        let mut chart_builder = ChartBuilder::on(&drawing_area);
-        chart_builder
-            .margin(5)
-            .set_left_and_bottom_label_area_size(20);
-        let mut chart_context = chart_builder
-            .build_cartesian_2d((0..100).into_segmented(), 0..1000)
-            .unwrap();
-        chart_context.configure_mesh().draw().unwrap();
-        chart_context
-            .draw_series(
-                Histogram::vertical(&chart_context)
-                    .style(BLUE.filled())
-                    .margin(10)
-                    .data(data),
-            )
-            .unwrap();
-    */
-    println!("{:?}", chi_stat);
-    println!("{:?}", expected_counts);
-    println!("{:?}", counts);
-    println!("{block_count}");
+        .sorted_by(|(_, x), (_, y)| x.partial_cmp(y).unwrap())
+        .filter(|(_, x)| *x < 0.3)
+        .collect();*/
+    //println!("{:#?}", relative_deviation);
 }
 
 #[cfg(test)]
@@ -115,7 +144,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn detect_works() {
-        detect();
+    fn detect() {
+        analyze_data();
     }
 }
