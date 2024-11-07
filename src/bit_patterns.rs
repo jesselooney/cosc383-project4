@@ -1,6 +1,20 @@
 use bitvec::prelude::*;
 use image::{Pixel, RgbImage};
 
+/// `Patterns` specify which bits the `inject` and `eject` functions are allowed to access when running.
+/// They do this by receiving the row and column of the pixels being queried, followed by the channel
+/// index (r, g, b), and then the bit index (0 - 7, least significant bits first) within that channel.
+/// The function then returns a `bool` to indicate whether the bit can be accessed or not.
+///
+/// # Examples
+///
+/// ```rs
+/// // This pattern would allow every single bit to be accessed
+/// fn access_all(row, column, channel, bit_index) {true}
+///
+/// // This pattern would allow only the least significant bits to be accessed
+/// fn access_least_significant_bits(row, column, channel, bit_index) {bit_index == 0}
+/// ````
 type Pattern = fn(u32, u32, usize, usize) -> bool;
 
 /// Contains the business logic for the `inject` and `eject` functions. This function is not meant to be called directly.
@@ -37,12 +51,16 @@ fn transject(
     return (image, message);
 }
 
+/// This function hides bits from a message into a provided image. This function will only check the bits
+/// specified by the `pattern`.
 pub fn inject(image: RgbImage, pattern: Pattern, message: BitVec<u8>) -> RgbImage {
     // this is a very shallow interface but idk how much i care
     let (image, _) = transject(image, pattern, message);
     image
 }
 
+/// This function extracts bits from in image. This function will only check the bits specified
+/// by the `pattern`.
 pub fn eject(image: RgbImage, pattern: Pattern, length: Option<usize>) -> BitVec<u8> {
     let img_len = image.pixels().len();
     let length = length.unwrap_or(img_len * 8);
@@ -53,6 +71,7 @@ pub fn eject(image: RgbImage, pattern: Pattern, length: Option<usize>) -> BitVec
     parsed_message
 }
 
+/// Sample `Pattern`s to be used with `inject` and `eject`
 pub mod patterns {
     pub fn access_all(_row: u32, _column: u32, _channel: usize, _index: usize) -> bool {
         true

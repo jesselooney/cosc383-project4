@@ -1,8 +1,9 @@
 use crate::bit_patterns::{eject, inject, patterns};
-/// This file contains functions which will perform useful
-/// transformations on images.
 use bitvec::prelude::*;
 use image::RgbImage;
+
+/// This file contains functions which will perform useful
+/// transformations on images and binary data.
 
 /// This function amplifies the least significant bit of
 /// each channel so that hidden changes become more visible
@@ -20,10 +21,18 @@ pub fn amplify_least_significant_bits(image: RgbImage) -> RgbImage {
     inject(image, patterns::access_all, transformed_image_bits)
 }
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn my_epic_test() {
-        assert!(true)
+// FIXME: this fails with an unclear error when presented with certain inputs, investigate why
+// (i think it has to do with when the input isn't divisible by 8)
+pub fn flipsy_flipsy(mut input: BitVec<u8>) -> BitVec<u8> {
+    let mut result: BitVec<u8> = BitVec::new();
+
+    for i in 0..input.len() - 1 {
+        if i % 8 == 0 {
+            let mut tmp = input.drain(0..8).collect::<BitVec>();
+            tmp.reverse();
+            result.extend(tmp);
+        }
     }
+
+    result
 }
