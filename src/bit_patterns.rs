@@ -29,8 +29,9 @@ fn transject(
     mut message: BitVec<u8>,
 ) -> (RgbImage, BitVec<u8>) {
     let mut message_index = 0;
+
     for (pixel_row, pixel_col, pixel) in &mut image.enumerate_pixels_mut() {
-        for (channel_index, channel_value) in &mut pixel.channels_mut().into_iter().enumerate() {
+        for (channel_index, channel_value) in &mut pixel.channels_mut().iter_mut().enumerate() {
             let bits = channel_value.view_bits_mut::<Lsb0>();
             for (bit_index, mut bit) in bits.iter_mut().enumerate() {
                 if message_index >= message.len() {
@@ -38,9 +39,11 @@ fn transject(
                 }
 
                 if pattern(pixel_row, pixel_col, channel_index, bit_index) {
-                    // i'm sure theres a better way to swap these two but idc
-                    let tmp = bit.clone();
-                    *bit = *message.get(message_index).unwrap();
+                    // TODO Find a better way to swap these things.
+                    let tmp = *bit;
+                    *bit = *message
+                        .get(message_index)
+                        .expect("Failed to get next message bit at message_index");
                     message.set(message_index, tmp);
 
                     message_index += 1;
@@ -48,13 +51,13 @@ fn transject(
             }
         }
     }
-    return (image, message);
+
+    (image, message)
 }
 
 /// This function hides bits from a message into a provided image. This function will only check the bits
 /// specified by the `pattern`.
 pub fn inject(image: RgbImage, pattern: Pattern, message: BitVec<u8>) -> RgbImage {
-    // this is a very shallow interface but idk how much i care
     let (image, _) = transject(image, pattern, message);
     image
 }
@@ -94,7 +97,6 @@ mod tests {
     #[test]
     fn transject_invertible() {
         let img: RgbImage = image::open("assets/hide_text.png").unwrap().into();
-
         // TODO: theres gotta be a better way to create a message
         // ideally it'd be random and we'd run the test multiple times
         let mut message = bitvec![u8, LocalBits; 0; 40];
@@ -128,7 +130,7 @@ mod tests {
         message[20..30].store::<u16>(0x154);
         message[30..40].store::<u16>(0x06D);
 
-        let modified_img = inject(img.clone(), patterns::access_all.clone(), message.clone());
+        let modified_img = inject(img.clone(), patterns::access_all, message.clone());
 
         assert_ne!(img, modified_img);
 
