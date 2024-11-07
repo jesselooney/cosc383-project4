@@ -1,19 +1,11 @@
-use std::{
-    fs::File,
-    io::{Read, Write},
-    time::SystemTime,
-};
+use std::fs::File;
+use std::io::Write;
 mod bit_patterns;
 mod detect;
 mod transform;
 use anyhow::Result;
 use bit_patterns::{eject, patterns};
-use bitvec::{
-    bitvec,
-    field::BitField,
-    order::{Lsb0, Msb0},
-    vec::BitVec,
-};
+use bitvec::field::BitField;
 use image::RgbImage;
 
 fn main() -> Result<()> {

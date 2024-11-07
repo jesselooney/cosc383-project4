@@ -1,8 +1,9 @@
 use crate::bit_patterns::{eject, inject, patterns};
-/// This file contains functions which will perform useful
-/// transformations on images.
 use bitvec::prelude::*;
 use image::RgbImage;
+
+/// This file contains functions which will perform useful
+/// transformations on images and binary data.
 
 /// This function amplifies the least significant bit of
 /// each channel so that hidden changes become more visible
@@ -34,12 +35,4 @@ pub fn flipsy_flipsy(mut input: BitVec<u8>) -> BitVec<u8> {
     }
 
     result
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn my_epic_test() {
-        assert!(true)
-    }
 }
