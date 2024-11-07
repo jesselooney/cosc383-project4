@@ -64,6 +64,9 @@ pub fn monochrome_frequencies(lsb_square_frequencies: [f64; 4096]) -> [f64; 8] {
     monochrome_lsb_square_frequencies
 }
 
+/// WIP - the intent is to compute the monochrome frequencies on smaller regions of images to see
+/// how small we can go before the patterns I've observed break down. This will determine how small
+/// a message we can detect with the statistical approach.
 fn test_block_size(width: u64, height: u64, samples_per_image: u64) {
     let paths = fs::read_dir("assets/plain/").unwrap();
     for path in paths {
@@ -74,13 +77,14 @@ fn test_block_size(width: u64, height: u64, samples_per_image: u64) {
     }
 }
 
-/*
+/// This function was used to compute the lsb square frequencies on a bunch of unmodified test
+/// images and store them in a file for later use.
 fn get_test_data() {
     let paths = fs::read_dir("assets/plain/").unwrap();
 
     let mut data: Vec<Vec<f64>> = vec![vec![]; 4096];
 
-    // WARN outdated! Thihs file now stores the transpose of this data: the frequencies of each
+    // WARN outdated! This file now stores the transpose of this data: the frequencies of each
     // block all together for each image.
     // Accumulate a vector of observed block frequencies for each kind of block.
     for path in paths {
@@ -94,8 +98,9 @@ fn get_test_data() {
     let data_string = serde_json::to_string(&data).unwrap();
     fs::write("plain_image_data.json", data_string).unwrap();
 }
-*/
 
+// This function is mostly scratch work to find patterns in the lsb square frequencies data.
+// It no longer compiles because I broke the previous API.
 /*
 fn analyze_data() {
     let data_string = fs::read_to_string("assets/plain_image_data.json").unwrap();
@@ -132,10 +137,7 @@ fn analyze_data() {
         .collect();
 
     println!("{:#?}", frequent_uniform_blocks);
-    println!(
-        "{:#?}",
-        get_uniform_block_counts(test_block_frequencies.to_vec())
-    );
+    println!("{:#?}", monochrome_frequencies(test_block_frequencies));
     println!("The uniform frequencies are of one tenth the order in the modified image versus baseline. This should be detectable!");
     // Collect all block ids where each pixel (3 bits) has the same value.
 

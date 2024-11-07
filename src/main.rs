@@ -9,6 +9,8 @@ use bitvec::field::BitField;
 use image::RgbImage;
 
 fn main() -> Result<()> {
+    // This is all scratch work to extract stuff out of the examples.
+
     let img: RgbImage = image::open("assets/hide_text.png").unwrap().into();
     let mut length_bits = eject(
         img.clone(),
