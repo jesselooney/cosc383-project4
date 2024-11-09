@@ -1,0 +1,11 @@
+How the Telepathy Magic Trick is done:
+
+It may behoove the reader to first understand Freud's model concerning the Id, Ego, and Superego.
+In addition, a deep understanding of the fast Fourier transform as applied to sound waves may help in understanding (although perhaps not being able to perform) the trick.
+Finally, a background in the techniques commonly used by Tuvan throat singers may be helfpul.
+
+First a volunteer is called for by the magician.
+The rest is all a bit fuzzy.
+
+A more detailed description can be found hidden in the final project.
+Happy hunting!

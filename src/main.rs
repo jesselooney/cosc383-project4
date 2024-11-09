@@ -1,16 +1,33 @@
-use std::fs::File;
+use std::fs::{self, File};
 use std::io::Write;
+use std::path::PathBuf;
 mod bit_patterns;
 mod detect;
 mod transform;
 use anyhow::Result;
 use bit_patterns::{eject, patterns};
 use bitvec::field::BitField;
-use image::RgbImage;
+use image::{ImageReader, RgbImage};
 
+/// Here's a list of files that might have information hidden in them
+/// - Myself.png
+/// - RobotOnRealCat.png
+/// - Soccer.png
+/// - Steganography.png (data appears to be on the left side, maybe encoded top to bottom instead of left to right)
+/// - Teach.png
+/// - TouchingGrass.png
+/// - 383.png
+/// - Abominable.png
+/// - BackdoorAtks.png
+/// - BombAnswers.png
+/// - Cookies.png
+/// - Dance.png
+/// - Dream.png
+/// - Ideal.png (maybe, might just be weird artifacting)
+/// - Lockpicking.png
+/// - Lucy.png (maybe, might just be artifacting)
 fn main() -> Result<()> {
     // This is all scratch work to extract stuff out of the examples.
-
     let img: RgbImage = image::open("assets/hide_text.png").unwrap().into();
     let mut length_bits = eject(
         img.clone(),
@@ -22,48 +39,25 @@ fn main() -> Result<()> {
     let length = length_bits.load::<usize>() * 8 + 32;
     println!("string length: {length}");
 
-    let mut text_bits = eject(img, patterns::access_least_significant_bits, Some(length));
-    text_bits = text_bits.split_off(32);
-    text_bits = transform::flipsy_flipsy(text_bits);
+    // amplify all of the least significant bits of the given images
+    for path in fs::read_dir("./assets/project-images")? {
+        let path = path?.path();
 
-    let mut file = File::create("output.txt")?;
+        if path.is_dir() {
+            continue;
+        }
 
-    let bits: &[u8] = text_bits.as_raw_slice();
+        println!("Transforming: {:?}", path);
+        let image = ImageReader::open(path.clone())?.decode()?;
 
-    file.write_all(bits).unwrap();
+        let modified_img = transform::amplify_least_significant_bits(image.into());
 
-    let img: RgbImage = image::open("assets/hide_image.png").unwrap().into();
-    let mut height_width_bits = eject(
-        img.clone(),
-        patterns::access_least_significant_bits,
-        Some(64),
-    );
+        let mut result_path = PathBuf::from("./assets/project-images/transformed");
+        let file_name = path.strip_prefix("./assets/project-images/")?;
+        result_path.push(file_name);
 
-    println!("{:?}", height_width_bits);
-    height_width_bits.reverse(); // no clue why i have to do this
-    let width_bits = height_width_bits.split_off(32);
-    let height_bits = height_width_bits;
-    println!("{:?}", width_bits);
-    println!("{:?}", height_bits);
-
-    let height = height_bits.load::<usize>();
-    let width = width_bits.load::<usize>();
-    println!("height: {height}");
-    println!("height: {width}");
-
-    let total_pixels = height * width;
-    let length: usize = 64 + (total_pixels) * 3 * 8 * 10;
-    println!("length: {:?}", length);
-    let mut image_bits = eject(img, patterns::access_least_significant_bits, Some(length));
-    image_bits = image_bits.split_off(64);
-    image_bits.reverse();
-    //image_bits = transform::flipsy_flipsy(image_bits);
-
-    let mut file = File::create("output.png")?;
-
-    let bits: &[u8] = image_bits.as_raw_slice();
-
-    file.write_all(bits).unwrap();
+        modified_img.save(result_path)?;
+    }
 
     Ok(())
 }
