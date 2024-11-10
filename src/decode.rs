@@ -152,7 +152,7 @@ pub fn steganography() -> Result<()> {
 /// - data encoded left to right, top to bottom
 /// - looks like encoding skips pixels or channels
 /// - data stored in first lsb
-pub fn touching_grass() -> Result<()> {
+pub fn teach() -> Result<()> {
     Ok(())
 }
 
