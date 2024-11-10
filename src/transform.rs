@@ -70,7 +70,7 @@ pub fn amplify_all() -> Result<()> {
         println!("Transforming: {:?}", path);
         let image = ImageReader::open(path.clone())?.decode()?;
 
-        let modified_img = amplify_index_one_bit(image.into());
+        let modified_img = amplify_least_significant_bit(image.into());
 
         let mut result_path = PathBuf::from("./assets/project-images/transformed");
         let file_name = path.strip_prefix("./assets/project-images/")?;
