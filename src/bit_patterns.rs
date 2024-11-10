@@ -88,6 +88,10 @@ pub mod patterns {
     ) -> bool {
         index == 0
     }
+
+    pub fn access_index_one(_row: u32, _column: u32, _channel: usize, index: usize) -> bool {
+        index == 1
+    }
 }
 
 #[cfg(test)]
