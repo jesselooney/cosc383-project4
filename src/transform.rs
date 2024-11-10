@@ -58,7 +58,7 @@ pub fn flipsy_flipsy(mut input: BitVec<u8>) -> BitVec<u8> {
 }
 
 /// amplify all of the least significant bits of the given images
-fn amplify_all() -> Result<()> {
+pub fn amplify_all() -> Result<()> {
     // yes i know this function is horrifically impure deal with it
     for path in fs::read_dir("./assets/project-images")? {
         let path = path?.path();
@@ -70,7 +70,7 @@ fn amplify_all() -> Result<()> {
         println!("Transforming: {:?}", path);
         let image = ImageReader::open(path.clone())?.decode()?;
 
-        let modified_img = amplify_least_significant_bit(image.into());
+        let modified_img = amplify_index_one_bit(image.into());
 
         let mut result_path = PathBuf::from("./assets/project-images/transformed");
         let file_name = path.strip_prefix("./assets/project-images/")?;
