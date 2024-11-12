@@ -28,6 +28,11 @@ use image::RgbImage;
 // - Spyware.png
 // - Steganography.png (data appears to be on the left side, maybe encoded top to bottom instead of left to right)
 // - TouchingGrass.png
+//
+// the following images were corrupted and then replaced with uncorrupted images, so their notes might not be up to date:
+// - MusicToMyEars.png (this file wouldn't have had to be replaced if it didn't have data in it, am suspicious)
+// - Dream.png (appears to be superficially unchanged)
+// - Believe.png (looks like it has data in it, but is inconclusive)
 
 /// Decodes 383.png
 /// - data is encoded left to right, top to bottom
