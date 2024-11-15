@@ -22,9 +22,6 @@ pub fn extract_bits(image: &RgbImage, pattern: impl Pattern) -> BitVec<u8, Lsb0>
     let mut message: BitVec<u8, Lsb0> = BitVec::new();
     for (pixel_row, pixel_col, pixel) in image.enumerate_pixels() {
         for (channel_index, channel_value) in pixel.channels().iter().enumerate() {
-            // Consider the least significant bit to have index zero, but iterate in reverse so
-            // that we add the most significant bit to the message first, consistent with the
-            // message having Msb0 ordering.
             let bits = channel_value.view_bits::<Lsb0>();
             for (bit_index, bit_value) in bits.iter().enumerate() {
                 if pattern(pixel_row, pixel_col, channel_index, bit_index) {

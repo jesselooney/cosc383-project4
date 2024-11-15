@@ -21,6 +21,7 @@ pub fn with_file_path_suffix(file_path: impl AsRef<Path>, suffix: &str) -> Optio
     Some(new_file_path)
 }
 
+/// Saves the image extracted from the given file using `pattern` with a slightly altered name.
 pub fn write_extracted_image(image_path: impl AsRef<Path>, pattern: impl Pattern) -> Result<()> {
     let image = RgbImage::open(image_path.as_ref())?;
     let extracted_image = extract_image(&image, pattern);
@@ -30,6 +31,8 @@ pub fn write_extracted_image(image_path: impl AsRef<Path>, pattern: impl Pattern
     Ok(())
 }
 
+/// Saves the result of amplifying the `index`-th bit of the given image with a slightly altered
+/// name.
 pub fn write_amplified_image(image_path: impl AsRef<Path>, index: usize) -> Result<()> {
     let image = RgbImage::open(image_path.as_ref())?;
     let amplified_image = amplify_image(&image, index);
@@ -40,6 +43,7 @@ pub fn write_amplified_image(image_path: impl AsRef<Path>, index: usize) -> Resu
     Ok(())
 }
 
+/// Calls `write_amplified_image` on `image_path` with `index` = 0, 1, ..., 7.
 pub fn write_amplified_images(image_path: impl AsRef<Path>) -> Result<()> {
     for index in 0..8 {
         write_amplified_image(image_path.as_ref(), index)?;
@@ -47,6 +51,8 @@ pub fn write_amplified_images(image_path: impl AsRef<Path>) -> Result<()> {
     Ok(())
 }
 
+/// Saves every amplified form of every image in the source directory into the output directory
+/// with appropriate names.
 pub fn write_amplified_dir(
     source_dir_path: impl AsRef<Path>,
     output_dir_path: impl AsRef<Path>,

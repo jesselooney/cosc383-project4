@@ -14,7 +14,7 @@ fn main() -> Result<()> {
     // write_amplified_dir("assets/sources/", "assets/amplified/")?;
 
     // Investigate a specific image
-    write_amplified_images("assets/working/Phishing/Phishing.png")?;
+    // write_amplified_images("assets/working/Phishing/Phishing.png")?;
     // write_extracted_image(
     //     "assets/working/Phishing/Phishing.png",
     //     patterns::access_index(0),
