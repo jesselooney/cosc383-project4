@@ -1,6 +1,7 @@
 
-/assets/amplified
-/assets/messages
+/assets/amplified/*.png
+*-extract*
+*-amplify*
 
 # Cargo
 /target

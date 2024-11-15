@@ -1,12 +1,7 @@
-use crate::{
-    assemble::write_image,
-    bit_patterns::{eject, extract, patterns},
-    transform,
-};
+use crate::helpers::*;
 use anyhow::Result;
 use bitvec::prelude::*;
-use bitvec::{field::BitField, view::BitView};
-use image::RgbImage;
+use image::*;
 
 /// This module will contain 1 function per image in the set that has data in it.
 /// This module mainly exists to record what we had to do in order to solve the various images,
@@ -45,15 +40,6 @@ use image::RgbImage;
 /// - data is stored in the first lsb (index 0)
 /// - source image is 2048 by 2048
 pub fn three_eight_three() -> Result<()> {
-    let im: RgbImage = image::open("assets/sources/383.png")?.into();
-    let bits = extract(&im, patterns::access_least_significant_bits);
-    println!("{}; {}", &bits[0..32], &bits[32..64]);
-    let height = bits[0..32].load_be::<u32>();
-    let width = bits[32..64].load_be::<u32>();
-    println!("{} x {}", width, height);
-    let bit_len = (width * height * 3 * 8) as usize;
-    let data: BitVec<u8, Msb0> = bits[64..(bit_len + 64)].to_bitvec();
-    write_image("assets/messages/383.png", data, width, height)?;
     Ok(())
 }
 
@@ -125,9 +111,6 @@ pub fn lockpicking() -> Result<()> {
 /// - the image only hides data in the first lsb (index 0)
 /// - source image is 1024 by 1024
 pub fn myself() -> Result<()> {
-    let image: RgbImage = image::open("./assets/project-images/Myself.png")
-        .unwrap()
-        .into();
     Ok(())
 }
 
@@ -135,6 +118,9 @@ pub fn myself() -> Result<()> {
 /// - data is stored left to right, top to bottom
 /// - the image only hides data in the first lsb (index 0)
 /// - source image is 1024 by 1024
+///
+/// I just get something that looks like the amplified LSBs of the original image, so either I'm
+/// doing something wrong or this is a red herring.
 pub fn phishing() -> Result<()> {
     Ok(())
 }
@@ -180,16 +166,5 @@ pub fn teach() -> Result<()> {
 /// - data encoded top to bottom, left to right
 /// - stores data in the first 2 lsbs
 pub fn touching_grass() -> Result<()> {
-    Ok(())
-}
-
-pub fn hide_image() -> Result<()> {
-    let im: RgbImage = image::open("assets/hide_image.png")?.into();
-    let bits = extract(&im, patterns::access_least_significant_bits);
-    let height = bits[0..32].load_be::<u32>();
-    let width = bits[32..64].load_be::<u32>();
-    let bit_len = (width * height * 3 * 8) as usize;
-    let data: BitVec<u8, Msb0> = bits[64..(bit_len + 64)].to_bitvec();
-    write_image("assets/hide_image-extraction.png", data, width, height)?;
     Ok(())
 }
