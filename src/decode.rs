@@ -51,7 +51,8 @@ pub fn three_eight_three() -> Result<()> {
 /// - source image is 2048 by 2048
 pub fn abominable() -> Result<()> {
     // The internal image is hidden in the red channel in bit index 0. It is an image of a graph
-    // public key.
+    // public key. I have not yet checked if this contains anything else. If it did, it would
+    // probably show on the white background, but it may be worth diving deeper later on.
     write_extracted_image(
         "assets/working/Abominable/Abominable.png",
         |_, _, chn, idx| (chn == 0) && (idx == 0),
