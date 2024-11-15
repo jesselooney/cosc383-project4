@@ -1,3 +1,5 @@
+use crate::extensions::*;
+use crate::extract::*;
 use crate::helpers::*;
 use anyhow::Result;
 use bitvec::prelude::*;
@@ -48,6 +50,12 @@ pub fn three_eight_three() -> Result<()> {
 /// - data is stored in the first lsb (index 0)
 /// - source image is 2048 by 2048
 pub fn abominable() -> Result<()> {
+    // The internal image is hidden in the red channel in bit index 0. It is an image of a graph
+    // public key.
+    write_extracted_image(
+        "assets/working/Abominable/Abominable.png",
+        |_, _, chn, idx| (chn == 0) && (idx == 0),
+    )?;
     Ok(())
 }
 /// Decodes Acorn.png

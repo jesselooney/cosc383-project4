@@ -21,13 +21,31 @@ pub fn with_file_path_suffix(file_path: impl AsRef<Path>, suffix: &str) -> Optio
     Some(new_file_path)
 }
 
+pub fn write_extracted_bytes(image_path: impl AsRef<Path>, pattern: impl Pattern) -> Result<()> {
+    let image = RgbImage::open(image_path.as_ref())?;
+    let mut bits = extract_bits(&image, pattern);
+
+    let bytes_path = with_file_path_suffix(image_path.as_ref(), "-extract")
+        .ok_or(anyhow!("`image_path` must be a file path"))?
+        .with_extension("bin");
+    fs::write(&bytes_path, bits.as_raw_slice())?;
+    println!("Wrote {}", bytes_path.display());
+
+    let reversed_bytes_path = with_file_path_suffix(&bytes_path, "_rev").unwrap();
+    bits.chunks_exact_mut(8).for_each(|bs| bs.reverse());
+    fs::write(&reversed_bytes_path, bits.as_raw_slice())?;
+    println!("Wrote {}", reversed_bytes_path.display());
+    Ok(())
+}
+
 /// Saves the image extracted from the given file using `pattern` with a slightly altered name.
 pub fn write_extracted_image(image_path: impl AsRef<Path>, pattern: impl Pattern) -> Result<()> {
     let image = RgbImage::open(image_path.as_ref())?;
     let extracted_image = extract_image(&image, pattern);
     let new_image_path = with_file_path_suffix(image_path.as_ref(), "-extract")
         .ok_or(anyhow!("`image_path` must be a file path"))?;
-    extracted_image.save(new_image_path)?;
+    extracted_image.save(&new_image_path)?;
+    println!("Wrote {}", new_image_path.display());
     Ok(())
 }
 
@@ -39,7 +57,8 @@ pub fn write_amplified_image(image_path: impl AsRef<Path>, index: usize) -> Resu
     let new_image_path =
         with_file_path_suffix(image_path.as_ref(), format!("-amplify{}", index).as_str())
             .ok_or(anyhow!("`image_path` must be a file path"))?;
-    amplified_image.save(new_image_path)?;
+    amplified_image.save(&new_image_path)?;
+    println!("Wrote {}", new_image_path.display());
     Ok(())
 }
 
