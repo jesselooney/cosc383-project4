@@ -64,6 +64,8 @@ pub fn abominable() -> Result<()> {
 /// - data is stored in the third lsb (index 2)
 /// - source image is 1024 by 1024
 pub fn acorn() -> Result<()> {
+    // This is a mirrored (?), scaled-down version of the original.
+    write_extracted_image("assets/working/Acorn/Acorn.png", patterns::access_index(2))?;
     Ok(())
 }
 
@@ -127,10 +129,12 @@ pub fn myself() -> Result<()> {
 /// - data is stored left to right, top to bottom
 /// - the image only hides data in the first lsb (index 0)
 /// - source image is 1024 by 1024
-///
-/// I just get something that looks like the amplified LSBs of the original image, so either I'm
-/// doing something wrong or this is a red herring.
 pub fn phishing() -> Result<()> {
+    // This is a scaled-down version of the original.
+    write_extracted_image(
+        "assets/working/Phishing/Phishing.png",
+        patterns::access_index(0),
+    )?;
     Ok(())
 }
 
