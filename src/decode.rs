@@ -119,6 +119,20 @@ pub fn dream() -> Result<()> {
 /// - data encoded top to bottom
 /// - only stores data in the second lsb (index 1)
 pub fn friendship() -> Result<()> {
+    // This yields the same image but smaller.
+    write_extracted_image(
+        "assets/working/Friendship/Friendship.png",
+        patterns::access_index(1),
+    )?;
+    write_amplified_images("assets/working/Friendship/Friendship-extract.png")?;
+    Ok(())
+}
+
+pub fn ideal() -> Result<()> {
+    // Black-and-white image for XORing.
+    write_extracted_image("assets/working/Ideal/Ideal.png", |_, _, chn, idx| {
+        (chn == 0) && (idx == 0)
+    })?;
     Ok(())
 }
 
@@ -129,6 +143,10 @@ pub fn friendship() -> Result<()> {
 /// - data is stored in the first lsb
 /// - source image is 1024 by 1024
 pub fn lockpicking() -> Result<()> {
+    Ok(())
+}
+
+pub fn music_to_my_ears() -> Result<()> {
     Ok(())
 }
 
@@ -150,6 +168,26 @@ pub fn phishing() -> Result<()> {
         "assets/working/Phishing/Phishing.png",
         patterns::access_index(0),
     )?;
+    Ok(())
+}
+
+pub fn professor_alfeld() -> Result<()> {
+    // This yields a rotated version of the original.
+    write_extracted_image(
+        "assets/working/ProfessorAlfeld/ProfessorAlfeld.png",
+        |_, _, chn, idx| (chn == 2) && (idx == 0),
+    )?;
+    write_amplified_images("assets/working/ProfessorAlfeld/ProfessorAlfeld-extract.png")?;
+    Ok(())
+}
+
+pub fn robot_on_real_cat() -> Result<()> {
+    // This yields a rotated version of the original.
+    write_extracted_image(
+        "assets/working/RobotOnRealCat/RobotOnRealCat.png",
+        |_, _, chn, idx| (chn == 2) && (idx == 0),
+    )?;
+    write_amplified_images("assets/working/RobotOnRealCat/RobotOnRealCat-extract.png")?;
     Ok(())
 }
 
