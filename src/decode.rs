@@ -82,6 +82,18 @@ pub fn bomb_answers() -> Result<()> {
 /// - data is stored in the first lsb
 /// - source image is 2048 by 2048
 pub fn cookies() -> Result<()> {
+    // This yields an image with three Poke Balls and someone looking inquisitively at them.
+    write_extracted_image(
+        "assets/working/Cookies/Cookies.png",
+        patterns::access_index(0),
+    )?;
+    // write_amplified_images("assets/working/Cookies/Cookies-extract.png")?;
+    // The least significant bits contain a block of mostly white with some chunks of other data in
+    // it. Not sure what to do with the extracted bytes.
+    write_extracted_bytes(
+        "assets/working/Cookies/Cookies-extract.png",
+        patterns::access_index(0),
+    )?;
     Ok(())
 }
 
@@ -97,6 +109,9 @@ pub fn dance() -> Result<()> {
 /// - data is stored left to right, top to bottom
 /// - data is stored in the first 3 lsbs
 pub fn dream() -> Result<()> {
+    // This yields the same image but mirrored/rotated.
+    write_extracted_image("assets/working/Dream/Dream.png", |_, _, _, idx| idx <= 2)?;
+    write_amplified_images("assets/working/Dream/Dream-extract.png")?;
     Ok(())
 }
 
