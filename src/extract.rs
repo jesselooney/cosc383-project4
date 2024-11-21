@@ -1,8 +1,9 @@
 use crate::extensions::RgbImageExt;
-use crate::iteration_order::IterationOrder;
+use crate::iteration_order::{IterationOrder, Order::*};
 use anyhow::{anyhow, Result};
 use bitvec::prelude::*;
 use image::*;
+use itertools::{iproduct, Itertools, Permutations};
 
 // A hack to effectively alias a trait, taken from https://stackoverflow.com/a/57937836.
 pub trait Pattern: Fn(u32, u32, usize, usize) -> bool {}
@@ -63,58 +64,143 @@ pub fn extract_image(image: &RgbImage, pattern: impl Pattern) -> RgbImage {
 
     let data: BitVec<u8, Lsb0> = bits[64..(bit_len + 64)].to_bitvec();
 
-    RgbImage::from_bitvec(width, height, data)
+    RgbImage::from_bitvec(width, height, data).unwrap()
 }
 
 // --- New functions ---
-pub fn extract_bits_with_pattern_order(
-    image: &RgbImage,
-    pattern: impl Pattern,
-    order: &IterationOrder,
-) -> BitVec<u8> {
-    extract_bits_with_pattern_order_count(image, pattern, order, None)
+
+pub fn subpermutations<T, I>(iterator: I) -> Vec<Vec<T>>
+where
+    T: Clone,
+    I: ExactSizeIterator<Item = T> + Clone,
+{
+    // TODO Make unique?
+    (1..=iterator.len())
+        .flat_map(|permutation_size| {
+            iterator
+                .clone()
+                .permutations(permutation_size)
+                .collect::<Vec<Vec<T>>>()
+        })
+        .collect()
 }
 
-pub fn extract_bits_with_pattern_order_count(
+pub fn make_reasonable_iteration_orders() -> impl Iterator<Item = IterationOrder> {
+    let forward_or_reverse = [Forward, Reverse];
+    let channel_index_subpermutations = subpermutations([0, 1, 2].into_iter());
+    // Only check at most the four least significant bits.
+    let bit_index_subpermutations = subpermutations([0, 1, 2, 3].into_iter());
+    let index_orders = (0..4).permutations(4);
+
+    let iteration_orders = iproduct!(
+        forward_or_reverse,
+        forward_or_reverse,
+        channel_index_subpermutations,
+        bit_index_subpermutations,
+        index_orders
+    );
+
+    iteration_orders.map(
+        |(row_order, column_order, channel_indices, bit_indices, index_order)| {
+            IterationOrder::new(
+                row_order,
+                column_order,
+                channel_indices,
+                bit_indices,
+                index_order,
+            )
+        },
+    )
+}
+
+pub fn try_extraction_orders(image: &RgbImage) -> Result<()> {
+    // TODO we get lots of duplicate iteration orders when we change the index order but one or
+    // more of the indices (typically, channel/bit) is only allowed to take one value
+    // Maybe we can just cache the first N bits of the bitvec (after the header, which might be the
+    // same for multiple images stored in one) and then abort processing if we start finding the
+    // exact same data.
+
+    const PEEK_SIZE: usize = 128;
+    assert!(PEEK_SIZE >= 64);
+
+    let mut prev_peek_bits: BitVec<u8> = bitvec![u8, Lsb0; 1; PEEK_SIZE];
+    let iteration_orders = make_reasonable_iteration_orders();
+    for iteration_order in iteration_orders {
+        println!("==== Trying {:?}", iteration_order);
+
+        let peek_bits = extract_bits_with_order_count(image, &iteration_order, Some(PEEK_SIZE));
+        let (width, height) = extract_image_header(&peek_bits);
+        println!("{} x {}", width, height);
+        if (width * height <= image.width() * image.height()) && peek_bits != prev_peek_bits {
+            // Update our cached peek bits so long as we were actually able to read out all
+            // PEEK_SIZE of them (so that we dont change the length of `prev_peek_bits`).
+            if peek_bits.len() == prev_peek_bits.len() {
+                prev_peek_bits = peek_bits;
+            }
+            // Go ahead with full extraction
+            println!("Found {} x {} image", width, height);
+            if let Ok(out_image) = extract_image_with_order(image, &iteration_order) {
+                let file_name = format!("test/{}.png", iteration_order.name());
+                if out_image
+                    .save(format!("test/{}.png", iteration_order.name()))
+                    .is_err()
+                {
+                    println!("Failed to save image as: {}", file_name);
+                }
+            } else {
+                println!("Failed to extract!");
+            }
+        }
+    }
+
+    Ok(())
+}
+
+pub fn extract_bits_with_order(image: &RgbImage, order: &IterationOrder) -> BitVec<u8> {
+    extract_bits_with_order_count(image, order, None)
+}
+
+pub fn extract_bits_with_order_count(
     image: &RgbImage,
-    pattern: impl Pattern,
     order: &IterationOrder,
     max_length: Option<usize>,
 ) -> BitVec<u8> {
     let mut bits = BitVec::new();
-    for (row, col, channel, bit_index) in order.into_iter(image.width(), image.height()) {
+    for (row, col, channel, bit_index) in order.clone().into_iter(image.width(), image.height()) {
         if let Some(max_length_num) = max_length {
+            /*
+                        println!(
+                            "row: {}, col: {}, chn: {}, idx: {}",
+                            row, col, channel, bit_index
+                        );
+            */
             if bits.len() >= max_length_num {
                 break;
             }
         }
-        if pattern(row, col, channel as usize, bit_index as usize) {
-            bits.push(get_bit(image, row, col, channel, bit_index));
-        }
+
+        bits.push(get_bit(image, row, col, channel, bit_index));
     }
     bits
 }
 
-pub fn extract_image_with_pattern_order(
-    image: &RgbImage,
-    pattern: impl Pattern,
-    order: &IterationOrder,
-) -> Result<RgbImage> {
-    let (width, height) = extract_image_header(image, &pattern, order);
+pub fn extract_image_with_order(image: &RgbImage, order: &IterationOrder) -> Result<RgbImage> {
+    let bits = extract_bits_with_order(image, order);
+    let (width, height) = extract_image_header(&bits);
     if width * height <= image.width() * image.height() {
-        let bits = extract_bits_with_pattern_order(image, &pattern, order);
-        Ok(RgbImage::from_bitvec(width, height, bits[64..].to_bitvec()))
+        let bits = extract_bits_with_order(image, order);
+        Ok(RgbImage::from_bitvec(
+            width,
+            height,
+            bits[64..].to_bitvec(),
+        )?)
     } else {
         Err(anyhow!("inner image would have more pixels than original"))
     }
 }
 
-pub fn extract_image_header(
-    image: &RgbImage,
-    pattern: impl Pattern,
-    order: &IterationOrder,
-) -> (u32, u32) {
-    let mut header_bits = extract_bits_with_pattern_order_count(image, pattern, order, Some(64));
+pub fn extract_image_header(bits: &BitVec<u8>) -> (u32, u32) {
+    let mut header_bits = bits[0..64].to_bitvec();
     header_bits.reverse();
     let width = header_bits[0..32].load_le::<u32>();
     let height = header_bits[32..64].load_le::<u32>();

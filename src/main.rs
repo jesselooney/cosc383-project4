@@ -70,13 +70,14 @@ fn main() -> Result<()> {
         |_, _, chn, idx| (chn == 0) && (idx == 0),
     )?;*/
 
-    let image: RgbImage = image::open("assets/working/Myself/Myself.png")?.into();
-    let image2 = extract_image_with_pattern_order(
+    let image: RgbImage = image::open("assets/working/Phishing/Phishing.png")?.into();
+    /*let image2 = extract_image_with_order(
         &image,
-        patterns::access_index(0),
-        &IterationOrder::new(Forward, Forward, [0, 1, 2], Forward, [1, 0, 2, 3]),
+        &IterationOrder::new(Forward, Forward, [0, 1, 2], [0], [1, 0, 2, 3]),
     )?;
-    image2.save("test2.png")?;
+    image2.save("test2.png")?;*/
+
+    try_extraction_orders(&image)?;
 
     Ok(())
 }
