@@ -1,3 +1,5 @@
+use std::fs;
+
 use crate::extensions::RgbImageExt;
 use crate::iteration_order::{IterationOrder, Order::*};
 use anyhow::{anyhow, Result};
@@ -89,7 +91,7 @@ pub fn make_reasonable_iteration_orders() -> impl Iterator<Item = IterationOrder
     let forward_or_reverse = [Forward, Reverse];
     let channel_index_subpermutations = subpermutations([0, 1, 2].into_iter());
     // Only check at most the four least significant bits.
-    let bit_index_subpermutations = subpermutations([0, 1, 2, 3].into_iter());
+    let bit_index_subpermutations = [vec![0], vec![1], vec![2], vec![0, 1], vec![0, 1, 2]];
     let index_orders = (0..4).permutations(4);
 
     let iteration_orders = iproduct!(
@@ -113,7 +115,7 @@ pub fn make_reasonable_iteration_orders() -> impl Iterator<Item = IterationOrder
     )
 }
 
-pub fn try_extraction_orders(image: &RgbImage) -> Result<()> {
+pub fn try_extraction_orders(image: &RgbImage, prefix: &str) -> Result<()> {
     // TODO we get lots of duplicate iteration orders when we change the index order but one or
     // more of the indices (typically, channel/bit) is only allowed to take one value
     // Maybe we can just cache the first N bits of the bitvec (after the header, which might be the
@@ -126,34 +128,79 @@ pub fn try_extraction_orders(image: &RgbImage) -> Result<()> {
     let mut prev_peek_bits: BitVec<u8> = bitvec![u8, Lsb0; 1; PEEK_SIZE];
     let iteration_orders = make_reasonable_iteration_orders();
     for iteration_order in iteration_orders {
-        println!("==== Trying {:?}", iteration_order);
-
         let peek_bits = extract_bits_with_order_count(image, &iteration_order, Some(PEEK_SIZE));
         let (width, height) = extract_image_header(&peek_bits);
-        println!("{} x {}", width, height);
-        if (width * height <= image.width() * image.height()) && peek_bits != prev_peek_bits {
+        let length = extract_text_header(&peek_bits);
+
+        /*
+        if peek_bits == prev_peek_bits {
+            continue;
+        } else {
             // Update our cached peek bits so long as we were actually able to read out all
             // PEEK_SIZE of them (so that we dont change the length of `prev_peek_bits`).
+            println!("{} \n {}", prev_peek_bits, peek_bits);
             if peek_bits.len() == prev_peek_bits.len() {
                 prev_peek_bits = peek_bits;
             }
+        }*/
+
+        // We only read out at most half the bits in an image, so the subimage can be at most half
+        // the size. Even this constraint is a little loose.
+        let max_subimage_size = (image.width() as u64) * (image.height() as u64) / 2;
+        let image_size = (width as u64) * (height as u64);
+
+        // Image extraction
+        if (image_size <= max_subimage_size) && (width != 0) && (height != 0) {
             // Go ahead with full extraction
-            println!("Found {} x {} image", width, height);
+            println!(
+                "Found {} x {} image using {}",
+                width,
+                height,
+                iteration_order.name()
+            );
             if let Ok(out_image) = extract_image_with_order(image, &iteration_order) {
-                let file_name = format!("test/{}.png", iteration_order.name());
-                if out_image
-                    .save(format!("test/{}.png", iteration_order.name()))
-                    .is_err()
-                {
+                let file_name = format!("{}{}.png", prefix, iteration_order.name());
+                if out_image.save(file_name.as_str()).is_err() {
                     println!("Failed to save image as: {}", file_name);
                 }
             } else {
                 println!("Failed to extract!");
             }
         }
+
+        // Every pixel in an image is 3 bytes.
+        let max_text_size = max_subimage_size * 3;
+        // Text extraction
+        if (length <= max_text_size) && (length >= 10) {
+            println!(
+                "Fount {} byte message using {}",
+                length,
+                iteration_order.name()
+            );
+
+            let bits =
+                extract_bits_with_order_count(image, &iteration_order, Some((length * 8) as usize));
+            let target_bits = bits[64..].to_bitvec();
+            let bytes = target_bits.as_raw_slice();
+            if is_text(bytes) {
+                let file_name = format!("{}{}.bytes", prefix, iteration_order.name());
+                if fs::write(file_name.as_str(), bytes).is_err() {
+                    println!("Failed to save bytes as: {}", file_name);
+                }
+            }
+        }
     }
 
     Ok(())
+}
+
+pub fn is_text(bytes: &[u8]) -> bool {
+    for byte in bytes {
+        if *byte < 32 {
+            return false;
+        }
+    }
+    true
 }
 
 pub fn extract_bits_with_order(image: &RgbImage, order: &IterationOrder) -> BitVec<u8> {
@@ -205,6 +252,12 @@ pub fn extract_image_header(bits: &BitVec<u8>) -> (u32, u32) {
     let width = header_bits[0..32].load_le::<u32>();
     let height = header_bits[32..64].load_le::<u32>();
     (width, height)
+}
+
+pub fn extract_text_header(bits: &BitVec<u8>) -> u64 {
+    let mut header_bits = bits[0..64].to_bitvec();
+    header_bits.reverse();
+    header_bits.load_le::<u64>()
 }
 
 pub fn get_bit(image: &RgbImage, row: u32, col: u32, channel: u32, bit_index: u32) -> bool {

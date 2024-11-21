@@ -69,15 +69,33 @@ fn main() -> Result<()> {
         "assets/working/Abominable/Abominable.png",
         |_, _, chn, idx| (chn == 0) && (idx == 0),
     )?;*/
+    /*
+    let image: RgbImage = image::open("assets/working/Phishing/Phishing.png")?.into();*/
 
-    let image: RgbImage = image::open("assets/working/Phishing/Phishing.png")?.into();
     /*let image2 = extract_image_with_order(
         &image,
         &IterationOrder::new(Forward, Forward, [0, 1, 2], [0], [1, 0, 2, 3]),
     )?;
     image2.save("test2.png")?;*/
+    let dir_entries = fs::read_dir("tests")?;
 
-    try_extraction_orders(&image)?;
+    for dir_entry in dir_entries {
+        let image_path = dir_entry?.path();
+        if !image_path.is_file() {
+            continue;
+        }
+        println!("=== Working on {}", image_path.display());
+
+        let image_name = image_path
+            .file_name()
+            .expect("`image_path` should have a file name");
+
+        let image: RgbImage = image::open(&image_path)?.into();
+        try_extraction_orders(
+            &image,
+            format!("tests_out/{}-", image_name.to_str().unwrap()).as_str(),
+        )?;
+    }
 
     Ok(())
 }
