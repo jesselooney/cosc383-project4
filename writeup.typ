@@ -21,8 +21,9 @@ This is our current codebase, and it can be found #link("https://github.com/jess
 
 // TODO: I'm planning on writing more about our process for auto detection, especially with the header stuff, and pattern matching/text detection, but I'm planning on reading through more of what you wrote first.
 
-= Findings
+The new codebase implements many different automatic detection methods. The current methodology tries iterating over the image as many ways as possible, and then sees which ones return valid data. We check both for reasonable sounding headers, and data that looks like text.
 
+= Findings
 
 == Sample Images
 
@@ -37,10 +38,14 @@ Many of the images simply contained rotated or mirrored, and then downscaled, ve
 - `Phishing.png`
 - `ProfessorAlfeld.png`
 - `RobotOnRealCat.png`
+- `Steganography.png`
+- `Teach.png`
+- `Spyware.png`
+- `Security.png`
 
 == XOR Message
 
-When searching inside `Ideal.png`, we found a square of black and white pixels that looks suspiciously like an image encrypted with a 1 time pad. Unfortunately we're unable to decrypt it without a second message encrypted with the same key.
+When searching inside `Ideal.png` and `Dream.png` we found two separate images that look like they were both encrypted with a 1 time pad. We XORed them together to try to begin to identify patterns with them, and found an image that looked like a bunch of stars.
 
 == Encryption Key
 
@@ -49,3 +54,38 @@ When searching inside `Abominable.png` we found what looked like a node graph en
 == Pokemon Choosing
 
 While searching inside `Cookies.png` we found what looks like a Pokemon trainer looking at three Poke Balls. We don't know what this means, but it might pertain to the question about Pr0Hax0r's preferred Pokemon.
+
+== Text
+
+We found the following snippets of text in various images:
+
+```
+To revert hex into executable file:
+xxd -r -p hexnumbers.txt > backtoexec.txt
+```
+
+```
+Roses are red,
+Black roses are black,
+Now add the right nodes
+To get the message back.
+```
+
+```
+P.S. I tried encrypting my favorite color with the graph to test it.
+I jot down the node values somewhere, but I can't find it anymore...
+```
+
+```
+From: Scott Alfeld <salfeld@amherst.edu>
+Date: Mon, 14 Oct 2024 09:52:42 -0400
+Subject: [COSC383F24] Final Exam
+To: Soyon Choi <sochoi25@amherst.edu>
+Content-Type: text/plain; charset="UTF-8"
+
+Can you take a gander at this and let me know what I should use for this year's final?
+Link: https://tinyurl.com/cosc383finalf22
+
+~SA
+[the link goes to "Ylvis - The Fox (What Does The Fox Say?) [Official music video HD]"]
+```

@@ -38,7 +38,7 @@ From a text found in the LSBs of an image found in the LSBs of the red channel o
 + What is Pr0hax0r’s pokemon of choice?
 
 + Does Pr0hax0r like NVIDIA?
-No; they are "bitter" about the price, craching drivers, and premium features.
+No; they are "bitter" about the price, crashing drivers, and premium features.
 From a text found in the LSBs of the blue channel (top-to-bottom) of an image found in the 1st and 2nd LSBs (top-to-bottom) of Steganography.png.
 
 + Does Pr0hax0r like gdb?

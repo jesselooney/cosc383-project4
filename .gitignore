@@ -6,3 +6,5 @@
 # Cargo
 /target
 .direnv
+
+*.pdf
