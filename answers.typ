@@ -7,7 +7,11 @@ If they did as planned, they got the sock puppet on June 7th, 2023 in a "totally
 From a text found in the LSBs of the red channel of an image found in the 3rd LSBs of Acorn.png.
 
 + The other day, someone left me a surprise gift at my office door. It was a lamp! What does it mean?
+
+
 + How does Pr0Hax0r feel about sharks?
+
+
 + Does Pr0Hax0r have any good advice?
 
 advice found:
@@ -20,9 +24,10 @@ From a text found in the LSBs of the red channel of an image found in the 3rd LS
 
 + Did Pr0HaX0r leave any red herrings?
 Yes. One was in the LSBs of an image found in the 2nd LSBs of Security.png.
-+ What did I say about bitwise operations?
-+ How do you make me angry?
 
++ What did I say about bitwise operations?
+
++ How do you make me angry?
 1. Call you Dr. Alfeld.
 From a text found in the LSBs of the green channel of an image found in the LSBs of Lockpicking.png.
 2. Regularly mumble things under your breath, then refuse to tell him what you said.
@@ -31,8 +36,13 @@ From a text found in the LSBs of the blue channel of an image found in the LSBs 
 From a text found in the LSBs of an image found in the LSBs of the red channel of BackdoorAttks.png
 
 + What is Pr0hax0r’s pokemon of choice?
+
 + Does Pr0hax0r like NVIDIA?
 No; they are "bitter" about the price, craching drivers, and premium features.
 From a text found in the LSBs of the blue channel (top-to-bottom) of an image found in the 1st and 2nd LSBs (top-to-bottom) of Steganography.png.
+
 + Does Pr0hax0r like gdb?
+Pr0hax0r has a nuanced opinion of gdb. Although they express frustration at the complexities and clunkiness of using gdb, they ultimately praise its "backtrace view" and helpfulness in "unveiling bugs".
+From a text found in the LSBs of the green channel of Lockpick.png.
+
 + How do you diffuse the bomb?
