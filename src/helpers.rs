@@ -1,5 +1,6 @@
 use crate::extensions::RgbImageExt;
-use crate::extract::{extract_bits, extract_image, Pattern};
+use crate::extract::{extract_bits, extract_bytes, extract_image};
+use crate::iteration_order::{IterationOrder, Order};
 use anyhow::{anyhow, Result};
 use bitvec::prelude::*;
 use image::*;
@@ -21,43 +22,43 @@ pub fn with_file_path_suffix(file_path: impl AsRef<Path>, suffix: &str) -> Optio
     Some(new_file_path)
 }
 
-pub fn write_extracted_bytes(image_path: impl AsRef<Path>, pattern: impl Pattern) -> Result<()> {
+pub fn write_extracted_bytes(image_path: impl AsRef<Path>, order: &IterationOrder) -> Result<()> {
     let image = RgbImage::open(image_path.as_ref())?;
-    let mut bits = extract_bits(&image, pattern);
+    let bytes = extract_bytes(&image, order)?;
 
     let bytes_path = with_file_path_suffix(image_path.as_ref(), "-extract")
         .ok_or(anyhow!("`image_path` must be a file path"))?
         .with_extension("bin");
-    fs::write(&bytes_path, bits.as_raw_slice())?;
-    println!("Wrote {}", bytes_path.display());
+    fs::write(&bytes_path, bytes)?;
 
-    let reversed_bytes_path = with_file_path_suffix(&bytes_path, "_rev").unwrap();
-    bits.chunks_exact_mut(8).for_each(|bs| bs.reverse());
-    fs::write(&reversed_bytes_path, bits.as_raw_slice())?;
-    println!("Wrote {}", reversed_bytes_path.display());
+    println!("Wrote {}", bytes_path.display());
     Ok(())
 }
 
 /// Saves the image extracted from the given file using `pattern` with a slightly altered name.
-pub fn write_extracted_image(image_path: impl AsRef<Path>, pattern: impl Pattern) -> Result<()> {
+pub fn write_extracted_image(image_path: impl AsRef<Path>, order: &IterationOrder) -> Result<()> {
     let image = RgbImage::open(image_path.as_ref())?;
-    let extracted_image = extract_image(&image, pattern);
+    let extracted_image = extract_image(&image, order);
+
     let new_image_path = with_file_path_suffix(image_path.as_ref(), "-extract")
         .ok_or(anyhow!("`image_path` must be a file path"))?;
-    extracted_image.save(&new_image_path)?;
+    extracted_image?.save(&new_image_path)?;
+
     println!("Wrote {}", new_image_path.display());
     Ok(())
 }
 
 /// Saves the result of amplifying the `index`-th bit of the given image with a slightly altered
 /// name.
-pub fn write_amplified_image(image_path: impl AsRef<Path>, index: usize) -> Result<()> {
+pub fn write_amplified_image(image_path: impl AsRef<Path>, index: u32) -> Result<()> {
     let image = RgbImage::open(image_path.as_ref())?;
     let amplified_image = amplify_image(&image, index);
+
     let new_image_path =
         with_file_path_suffix(image_path.as_ref(), format!("-amplify{}", index).as_str())
             .ok_or(anyhow!("`image_path` must be a file path"))?;
     amplified_image.save(&new_image_path)?;
+
     println!("Wrote {}", new_image_path.display());
     Ok(())
 }
@@ -115,8 +116,17 @@ pub fn amplify_bits<O: BitOrder>(bits: &BitVec<u8, O>) -> BitVec<u8, O> {
     amplified_bits
 }
 
-pub fn amplify_image(image: &RgbImage, index: usize) -> RgbImage {
-    let bits = extract_bits(image, |_, _, _, idx| idx == index);
+pub fn amplify_image(image: &RgbImage, index: u32) -> RgbImage {
+    let bits = extract_bits(
+        image,
+        &IterationOrder::new(
+            Order::Forward,
+            Order::Forward,
+            [0, 1, 2],
+            [index],
+            [0, 1, 2, 3],
+        ),
+    );
     let amplified_bits = amplify_bits(&bits);
     let amplified_image: RgbImage = RgbImage::from_raw(
         image.width(),

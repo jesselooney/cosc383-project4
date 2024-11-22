@@ -17,7 +17,7 @@ impl Order {
         }
     }
 
-    pub fn name(&self) -> &str {
+    pub fn identifier(&self) -> &str {
         match self {
             &Self::Forward => "F",
             &Self::Reverse => "R",
@@ -95,23 +95,34 @@ impl IterationOrder {
             inverse_order,
         }
     }
-    /*
-    type X = std::iter::Map<
-        itertools::ConsTuples<
-            itertools::Product<
-                itertools::ConsTuples<
-                    itertools::Product<
-                        itertools::Product<std::vec::IntoIter<u32>, std::vec::IntoIter<u32>>,
-                        std::vec::IntoIter<u32>,
-                    >,
-                    ((u32, u32), u32),
-                >,
-                std::vec::IntoIter<u32>,
-            >,
-            ((u32, u32, u32), u32),
-        >,
-        impl FnMut((u32, u32, u32, u32)) -> (u32, u32, u32, u32),
-    >;*/
+
+    pub fn top_to_bottom_left_to_right<I, J>(channel_indices: I, bit_indices: J) -> Self
+    where
+        I: IntoIterator<Item = u32>,
+        J: IntoIterator<Item = u32>,
+    {
+        Self::new(
+            Order::Forward,
+            Order::Forward,
+            channel_indices,
+            bit_indices,
+            [0, 1, 2, 3],
+        )
+    }
+
+    pub fn left_to_right_top_to_bottom<I, J>(channel_indices: I, bit_indices: J) -> Self
+    where
+        I: IntoIterator<Item = u32>,
+        J: IntoIterator<Item = u32>,
+    {
+        Self::new(
+            Order::Forward,
+            Order::Forward,
+            channel_indices,
+            bit_indices,
+            [1, 0, 2, 3],
+        )
+    }
 
     pub fn into_iter(self, width: u32, height: u32) -> impl Iterator<Item = (u32, u32, u32, u32)> {
         let row_iter = self.row_order.apply_to(0..height);
@@ -142,11 +153,11 @@ impl IterationOrder {
         })
     }
 
-    pub fn name(&self) -> String {
+    pub fn identifier(&self) -> String {
         format!(
-            "rw{}cl{}ch{}bt{}",
-            self.row_order.name(),
-            self.column_order.name(),
+            "{}{}_{}_{}_{}",
+            self.row_order.identifier(),
+            self.column_order.identifier(),
             &self
                 .channel_indices
                 .iter()
@@ -157,6 +168,11 @@ impl IterationOrder {
                 .iter()
                 .map(|x| x.to_string())
                 .collect::<Vec<String>>()
+                .join(""),
+            self.index_order
+                .iter()
+                .map(|x| x.to_string())
+                .collect::<Vec<String>>()
                 .join("")
         )
     }
@@ -164,6 +180,6 @@ impl IterationOrder {
 
 impl Default for IterationOrder {
     fn default() -> Self {
-        Self::new(Order::Forward, Order::Forward, [0, 1, 2], [1], [0, 1, 2, 3])
+        Self::new(Order::Forward, Order::Forward, [0, 1, 2], [0], [0, 1, 2, 3])
     }
 }

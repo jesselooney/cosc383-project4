@@ -1,6 +1,7 @@
 use crate::extensions::*;
 use crate::extract::*;
 use crate::helpers::*;
+use crate::iteration_order::IterationOrder;
 use anyhow::Result;
 use bitvec::prelude::*;
 use image::*;
@@ -55,7 +56,7 @@ pub fn abominable() -> Result<()> {
     // probably show on the white background, but it may be worth diving deeper later on.
     write_extracted_image(
         "assets/working/Abominable/Abominable.png",
-        |_, _, chn, idx| (chn == 0) && (idx == 0),
+        &IterationOrder::top_to_bottom_left_to_right([0], [0]),
     )?;
     Ok(())
 }
@@ -65,7 +66,7 @@ pub fn abominable() -> Result<()> {
 /// - source image is 1024 by 1024
 pub fn acorn() -> Result<()> {
     // This is a mirrored (?), scaled-down version of the original.
-    write_extracted_image("assets/working/Acorn/Acorn.png", patterns::access_index(2))?;
+    write_extracted_image("assets/working/Acorn/Acorn.png", &IterationOrder::default())?;
     Ok(())
 }
 
@@ -85,14 +86,14 @@ pub fn cookies() -> Result<()> {
     // This yields an image with three Poke Balls and someone looking inquisitively at them.
     write_extracted_image(
         "assets/working/Cookies/Cookies.png",
-        patterns::access_index(0),
+        &IterationOrder::default(),
     )?;
     // write_amplified_images("assets/working/Cookies/Cookies-extract.png")?;
     // The least significant bits contain a block of mostly white with some chunks of other data in
     // it. Not sure what to do with the extracted bytes.
     write_extracted_bytes(
         "assets/working/Cookies/Cookies-extract.png",
-        patterns::access_index(0),
+        &IterationOrder::default(),
     )?;
     Ok(())
 }
@@ -110,7 +111,10 @@ pub fn dance() -> Result<()> {
 /// - data is stored in the first 3 lsbs
 pub fn dream() -> Result<()> {
     // This yields the same image but mirrored/rotated.
-    write_extracted_image("assets/working/Dream/Dream.png", |_, _, _, idx| idx <= 2)?;
+    write_extracted_image(
+        "assets/working/Dream/Dream.png",
+        &IterationOrder::top_to_bottom_left_to_right([0, 1, 2], [0, 1, 2]),
+    )?;
     write_amplified_images("assets/working/Dream/Dream-extract.png")?;
     Ok(())
 }
@@ -122,7 +126,7 @@ pub fn friendship() -> Result<()> {
     // This yields the same image but smaller.
     write_extracted_image(
         "assets/working/Friendship/Friendship.png",
-        patterns::access_index(1),
+        &IterationOrder::top_to_bottom_left_to_right([0, 1, 2], [1]),
     )?;
     write_amplified_images("assets/working/Friendship/Friendship-extract.png")?;
     Ok(())
@@ -130,9 +134,10 @@ pub fn friendship() -> Result<()> {
 
 pub fn ideal() -> Result<()> {
     // Black-and-white image for XORing.
-    write_extracted_image("assets/working/Ideal/Ideal.png", |_, _, chn, idx| {
-        (chn == 0) && (idx == 0)
-    })?;
+    write_extracted_image(
+        "assets/working/Ideal/Ideal.png",
+        &IterationOrder::top_to_bottom_left_to_right([0], [0]),
+    )?;
     Ok(())
 }
 
@@ -166,7 +171,7 @@ pub fn phishing() -> Result<()> {
     // This is a scaled-down version of the original.
     write_extracted_image(
         "assets/working/Phishing/Phishing.png",
-        patterns::access_index(0),
+        &IterationOrder::default(),
     )?;
     Ok(())
 }
@@ -175,7 +180,7 @@ pub fn professor_alfeld() -> Result<()> {
     // This yields a rotated version of the original.
     write_extracted_image(
         "assets/working/ProfessorAlfeld/ProfessorAlfeld.png",
-        |_, _, chn, idx| (chn == 2) && (idx == 0),
+        &IterationOrder::top_to_bottom_left_to_right([2], [0]),
     )?;
     write_amplified_images("assets/working/ProfessorAlfeld/ProfessorAlfeld-extract.png")?;
     Ok(())
@@ -185,7 +190,7 @@ pub fn robot_on_real_cat() -> Result<()> {
     // This yields a rotated version of the original.
     write_extracted_image(
         "assets/working/RobotOnRealCat/RobotOnRealCat.png",
-        |_, _, chn, idx| (chn == 2) && (idx == 0),
+        &IterationOrder::top_to_bottom_left_to_right([2], [0]),
     )?;
     write_amplified_images("assets/working/RobotOnRealCat/RobotOnRealCat-extract.png")?;
     Ok(())

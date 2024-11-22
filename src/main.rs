@@ -1,3 +1,4 @@
+mod automatic;
 mod decode;
 mod extensions;
 mod extract;
@@ -7,6 +8,7 @@ use crate::iteration_order::{IterationOrder, Order::Forward};
 
 use std::fs;
 
+use crate::automatic::*;
 use crate::extensions::*;
 use crate::extract::*;
 use crate::helpers::*;
@@ -16,13 +18,6 @@ use bitvec::prelude::*;
 use image::*;
 use itertools::iproduct;
 use itertools::Itertools;
-
-fn find_extractions(image: RgbImage) {
-    let row_indices = 0..image.width();
-    let col_indices = 0..image.height();
-    let channel_iterators = (0..=2).permutations(3);
-    let bit_indices = 0..8;
-}
 
 fn main() -> Result<()> {
     // Amplify all the source images
@@ -72,23 +67,18 @@ fn main() -> Result<()> {
     /*
         let image: RgbImage = image::open("Acorn-extract.png")?.into();
 
-        let bits = extract_bits_with_order_count(
+        let bytes1 = extract_bytes_with_order(
             &image,
-            &IterationOrder::new(Forward, Forward, [0, 1, 2], [0], [0, 1, 2, 3]),
-            Some(32 + 569 * 8),
+            &IterationOrder::new(Forward, Forward, [0], [0], [1, 0, 2, 3]),
         );
-        // read 32 bits, reverse, load LE
-        let len1 = bits[0..32].to_bitvec();
-        println!("{}", len1);
-        let mut len2 = len1.clone();
-        len2.reverse();
-        println!("{} {}", len1.load_be::<u32>(), len2.load_le::<u32>());
-        let mut message_bits = bits[32..].to_bitvec();
-        message_bits.chunks_exact_mut(8).for_each(|bs| bs.reverse());
-        fs::write("test2.bytes", message_bits.as_raw_slice())?;
+        fs::write("test1.bytes", bytes1)?;
+        let bytes2 = extract_bytes_with_order(
+            &image,
+            &IterationOrder::new(Forward, Forward, [0, 1, 2], [0, 1], [0, 1, 2, 3]),
+        );
+        fs::write("test2.bytes", bytes2)?;
     */
-
-    let dir_entries = fs::read_dir("tests")?;
+    /* let dir_entries = fs::read_dir("tests")?;
 
     for dir_entry in dir_entries {
         let image_path = dir_entry?.path();
@@ -106,7 +96,9 @@ fn main() -> Result<()> {
             &image,
             format!("tests_out/{}-", image_name.to_str().unwrap()).as_str(),
         )?;
-    }
+    }*/
+
+    write_extractions_dir("assets/sources/", "assets/extractions/")?;
 
     Ok(())
 }
