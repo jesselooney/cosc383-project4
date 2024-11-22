@@ -1,0 +1,24 @@
+To revert hex into executable file:
+xxd -r -p hexnumbers.txt > backtoexec.txt
+
+
+Roses are red,
+Black roses are black,
+Now add the right nodes
+To get the message back.
+
+P.S. I tried encrypting my favorite color with the graph to test it.
+I jot down the node values somewhere, but I can't find it anymore...
+
+
+From: Scott Alfeld <salfeld@amherst.edu>
+Date: Mon, 14 Oct 2024 09:52:42 -0400
+Subject: [COSC383F24] Final Exam
+To: Soyon Choi <sochoi25@amherst.edu>
+Content-Type: text/plain; charset="UTF-8"
+
+Can you take a gander at this and let me know what I should use for this year's final?
+Link: https://tinyurl.com/cosc383finalf22
+
+~SA
+[the link goes to "Ylvis - The Fox (What Does The Fox Say?) [Official music video HD]"]
