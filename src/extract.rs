@@ -5,7 +5,7 @@ use crate::iteration_order::{IterationOrder, Order::*};
 use anyhow::{anyhow, Result};
 use bitvec::prelude::*;
 use image::*;
-use itertools::{iproduct, Itertools, Permutations};
+use itertools::{iproduct, Itertools};
 
 // A hack to effectively alias a trait, taken from https://stackoverflow.com/a/57937836.
 pub trait Pattern: Fn(u32, u32, usize, usize) -> bool {}
