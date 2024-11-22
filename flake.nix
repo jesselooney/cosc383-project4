@@ -28,6 +28,8 @@
         fontconfig
         rust-bin.nightly.latest.default
         rust-analyzer
+
+        typst
       ];
     in {
       devShell =
