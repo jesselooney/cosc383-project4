@@ -50,9 +50,9 @@ pub fn write_extracted_image(image_path: impl AsRef<Path>, order: &IterationOrde
 
 /// Saves the result of amplifying the `index`-th bit of the given image with a slightly altered
 /// name.
-pub fn write_amplified_image(image_path: impl AsRef<Path>, index: u32) -> Result<()> {
+pub fn write_amplified_image(image_path: impl AsRef<Path>, channel: u32, index: u32) -> Result<()> {
     let image = RgbImage::open(image_path.as_ref())?;
-    let amplified_image = amplify_image(&image, index);
+    let amplified_image = amplify_image(&image, channel, index);
 
     let new_image_path =
         with_file_path_suffix(image_path.as_ref(), format!("-amplify{}", index).as_str())
@@ -65,8 +65,10 @@ pub fn write_amplified_image(image_path: impl AsRef<Path>, index: u32) -> Result
 
 /// Calls `write_amplified_image` on `image_path` with `index` = 0, 1, ..., 7.
 pub fn write_amplified_images(image_path: impl AsRef<Path>) -> Result<()> {
-    for index in 0..8 {
-        write_amplified_image(image_path.as_ref(), index)?;
+    for channel in 0..3 {
+        for index in 0..8 {
+            write_amplified_image(image_path.as_ref(), channel, index)?;
+        }
     }
     Ok(())
 }
@@ -93,16 +95,18 @@ pub fn write_amplified_dir(
         amplified_image_base_path.push(image_name);
 
         let image: RgbImage = image::open(&image_path)?.into();
-        for index in 0..8 {
-            let amplified_image_path = with_file_path_suffix(
-                &amplified_image_base_path,
-                format!("-amplify{}", index).as_str(),
-            )
-            .expect("`amplified_image_base_path` should have a file name");
-            let amplified_image = amplify_image(&image, index);
-            amplified_image.save(&amplified_image_path)?;
+        for channel in 0..3 {
+            for index in 0..4 {
+                let amplified_image_path = with_file_path_suffix(
+                    &amplified_image_base_path,
+                    format!("-amplify_{}_{}", channel, index).as_str(),
+                )
+                .expect("`amplified_image_base_path` should have a file name");
+                let amplified_image = amplify_image(&image, channel, index);
+                amplified_image.save(&amplified_image_path)?;
 
-            println!("\tWrote {}", amplified_image_path.display());
+                println!("\tWrote {}", amplified_image_path.display());
+            }
         }
     }
     Ok(())
@@ -111,18 +115,18 @@ pub fn write_amplified_dir(
 pub fn amplify_bits<O: BitOrder>(bits: &BitVec<u8, O>) -> BitVec<u8, O> {
     let mut amplified_bits: BitVec<u8, O> = BitVec::new();
     for bit in bits {
-        amplified_bits.extend([*bit; 8]);
+        amplified_bits.extend([*bit; 24]);
     }
     amplified_bits
 }
 
-pub fn amplify_image(image: &RgbImage, index: u32) -> RgbImage {
+pub fn amplify_image(image: &RgbImage, channel: u32, index: u32) -> RgbImage {
     let bits = extract_bits(
         image,
         &IterationOrder::new(
             Order::Forward,
             Order::Forward,
-            [0, 1, 2],
+            [channel],
             [index],
             [0, 1, 2, 3],
         ),

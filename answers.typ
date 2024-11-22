@@ -46,3 +46,5 @@ Pr0hax0r has a nuanced opinion of gdb. Although they express frustration at the 
 From a text found in the LSBs of the green channel of Lockpick.png.
 
 + How do you diffuse the bomb?
+The password for the bomb hidden as hex in the LSBs of 383.png is: 0 1 3 0 4 9
+The hex decode tip was found in the LSBs of the blue channel of an image found in the 1st and 2nd LSBs of TouchingGrass.png.
