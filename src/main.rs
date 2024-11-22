@@ -20,59 +20,29 @@ use itertools::iproduct;
 use itertools::Itertools;
 
 fn main() -> Result<()> {
-    let mut xor1 = RgbImage::open("./assets/sources/Ideal-extract_FF_0_0_0123.png")?;
-    let mut xor2 = RgbImage::open("./assets/sources/Dance-extract_FF_1_0_0123.png")?;
-
-    let one: Rgb<u8> = Rgb::from([255, 255, 255]);
-    let zero: Rgb<u8> = Rgb::from([0, 0, 0]);
-
-    let mut one_vec = BitVec::<u8, Msb0>::new();
-    let mut two_vec = BitVec::<u8, Msb0>::new();
-
-    for (_, _, pixel) in xor1.enumerate_pixels() {
-        if pixel == &one {
-            one_vec.push(true)
-        } else if pixel == &zero {
-            one_vec.push(false)
-        } else {
-            panic!("yeet")
-        }
+    /*
+    if let Err(err) = write_extractions_dir("assets/sources/", "assets/extractions/") {
+        println!("{}", err);
     }
 
-    for (_, _, pixel) in xor2.enumerate_pixels() {
-        if pixel == &one {
-            two_vec.push(true)
-        } else if pixel == &zero {
-            two_vec.push(false)
-        } else {
-            panic!("yeet")
-        }
-    }
+    if let Err(err) = write_extractions_dir("assets/extractions/", "assets/extractions2/") {
+        println!("{}", err);
+    }*/
 
-    let decoded = one_vec ^ two_vec;
+    //write_amplified_dir("tests/sources/", "tests/amplified").expect("failed to amplify all");
+    //
+    //write_extracted_bytes("tests/sources/383.png", &IterationOrder::default())
+    //    .expect("should work");
 
-    for (row, col, pixel) in xor1.enumerate_pixels_mut() {
-        let index: usize = (row * col).try_into().unwrap();
-        match decoded[index] {
-            true => *pixel = one,
-            false => *pixel = zero,
-        };
-    }
+    let im1: RgbImage = image::open("assets/extractions/Ideal-extract_FF_0_0_0123.png")?.into();
+    let im2: RgbImage = image::open("assets/extractions/Dance-extract_FF_1_0_0123.png")?.into();
 
-    xor1.save("output.png")?;
+    let bits1 = extract_bits(&im1, &IterationOrder::all());
+    let bits2 = extract_bits(&im2, &IterationOrder::all());
 
-    // Amplify all the source images
-    // write_amplified_dir("assets/sources/", "assets/amplified/")?;
+    let bits3 = bits1 ^ bits2;
 
-    //if let Err(err) = write_extractions_dir("assets/sources/", "assets/extractions/") {
-    //println!("{}", err);
-    //}
-
-    //if let Err(err) = write_extractions_dir("assets/extractions/", "assets/extractions2/") {
-    //println!("{}", err);
-    //}
-
-    //decode::dream()?;
+    RgbImage::from_bitvec(im1.width(), im1.height(), bits3)?.save("xor-out.png")?;
 
     Ok(())
 }

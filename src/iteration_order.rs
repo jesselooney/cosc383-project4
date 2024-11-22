@@ -124,6 +124,10 @@ impl IterationOrder {
         )
     }
 
+    pub fn all() -> Self {
+        Self::new(Order::Forward, Order::Forward, 0..3, 0..8, [0, 1, 2, 3])
+    }
+
     pub fn into_iter(self, width: u32, height: u32) -> impl Iterator<Item = (u32, u32, u32, u32)> {
         let row_iter = self.row_order.apply_to(0..height);
         let column_iter = self.column_order.apply_to(0..width);

@@ -10,7 +10,8 @@ From a text found in the LSBs of the red channel of an image found in the 3rd LS
 
 
 + How does Pr0Hax0r feel about sharks?
-
+They do not like sharks, given the frowning face and shark images that were encrypted with the same one-time pad.
+From images found in the LSBs of the red channel of Ideal.png and the LSBs of the green channel of Dance.png.
 
 + Does Pr0Hax0r have any good advice?
 
