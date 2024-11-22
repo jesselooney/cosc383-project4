@@ -130,7 +130,7 @@ pub fn try_extraction_orders(image: &RgbImage, prefix: &str) -> Result<()> {
     for iteration_order in iteration_orders {
         let peek_bits = extract_bits_with_order_count(image, &iteration_order, Some(PEEK_SIZE));
         let (width, height) = extract_image_header(&peek_bits);
-        let length = extract_text_header(&peek_bits);
+        let length = extract_text_header(&peek_bits) as u64;
 
         /*
         if peek_bits == prev_peek_bits {
@@ -172,17 +172,13 @@ pub fn try_extraction_orders(image: &RgbImage, prefix: &str) -> Result<()> {
         let max_text_size = max_subimage_size * 3;
         // Text extraction
         if (length <= max_text_size) && (length >= 10) {
-            println!(
-                "Fount {} byte message using {}",
-                length,
-                iteration_order.name()
-            );
-
-            let bits =
-                extract_bits_with_order_count(image, &iteration_order, Some((length * 8) as usize));
-            let target_bits = bits[64..].to_bitvec();
-            let bytes = target_bits.as_raw_slice();
-            if is_text(bytes) {
+            let bytes = extract_bytes_with_order(image, &iteration_order);
+            if is_text(bytes.as_slice()) {
+                println!(
+                    "Fount {} byte message using {}",
+                    length,
+                    iteration_order.name()
+                );
                 let file_name = format!("{}{}.bytes", prefix, iteration_order.name());
                 if fs::write(file_name.as_str(), bytes).is_err() {
                     println!("Failed to save bytes as: {}", file_name);
@@ -194,13 +190,29 @@ pub fn try_extraction_orders(image: &RgbImage, prefix: &str) -> Result<()> {
     Ok(())
 }
 
+pub fn extract_bytes_with_order(image: &RgbImage, order: &IterationOrder) -> Vec<u8> {
+    let header_bits = extract_bits_with_order_count(image, order, Some(32));
+    let length = extract_text_header(&header_bits);
+    let bits = extract_bits_with_order_count(image, order, Some((length * 8) as usize + 32));
+    let mut message_bits = bits[32..].to_bitvec();
+    message_bits.chunks_exact_mut(8).for_each(|bs| bs.reverse());
+    message_bits.as_raw_slice().to_vec()
+}
+
 pub fn is_text(bytes: &[u8]) -> bool {
+    let mut printable_count = 0f32;
+    let mut letter_count = 0f32;
     for byte in bytes {
-        if *byte < 32 {
-            return false;
+        if *byte >= 32 {
+            printable_count += 1f32;
+        }
+        if (65..=90).contains(byte) || (97..=122).contains(byte) {
+            letter_count += 1f32;
         }
     }
-    true
+    let printable_frequency = printable_count / (bytes.len() as f32);
+    let letter_frequency = letter_count / (bytes.len() as f32);
+    printable_frequency > 0.8 && letter_frequency > 0.6
 }
 
 pub fn extract_bits_with_order(image: &RgbImage, order: &IterationOrder) -> BitVec<u8> {
@@ -232,18 +244,11 @@ pub fn extract_bits_with_order_count(
 }
 
 pub fn extract_image_with_order(image: &RgbImage, order: &IterationOrder) -> Result<RgbImage> {
-    let bits = extract_bits_with_order(image, order);
-    let (width, height) = extract_image_header(&bits);
-    if width * height <= image.width() * image.height() {
-        let bits = extract_bits_with_order(image, order);
-        Ok(RgbImage::from_bitvec(
-            width,
-            height,
-            bits[64..].to_bitvec(),
-        )?)
-    } else {
-        Err(anyhow!("inner image would have more pixels than original"))
-    }
+    let header_bits = extract_bits_with_order_count(image, order, Some(64));
+    let (width, height) = extract_image_header(&header_bits);
+    let bits =
+        extract_bits_with_order_count(image, order, Some((width * height * 3 * 8) as usize + 64));
+    RgbImage::from_bitvec(width, height, bits[64..].to_bitvec())
 }
 
 pub fn extract_image_header(bits: &BitVec<u8>) -> (u32, u32) {
@@ -254,10 +259,10 @@ pub fn extract_image_header(bits: &BitVec<u8>) -> (u32, u32) {
     (width, height)
 }
 
-pub fn extract_text_header(bits: &BitVec<u8>) -> u64 {
-    let mut header_bits = bits[0..64].to_bitvec();
+pub fn extract_text_header(bits: &BitVec<u8>) -> u32 {
+    let mut header_bits = bits[0..32].to_bitvec();
     header_bits.reverse();
-    header_bits.load_le::<u64>()
+    header_bits.load_le::<u32>()
 }
 
 pub fn get_bit(image: &RgbImage, row: u32, col: u32, channel: u32, bit_index: u32) -> bool {

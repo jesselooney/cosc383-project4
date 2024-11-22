@@ -70,13 +70,24 @@ fn main() -> Result<()> {
         |_, _, chn, idx| (chn == 0) && (idx == 0),
     )?;*/
     /*
-    let image: RgbImage = image::open("assets/working/Phishing/Phishing.png")?.into();*/
+        let image: RgbImage = image::open("Acorn-extract.png")?.into();
 
-    /*let image2 = extract_image_with_order(
-        &image,
-        &IterationOrder::new(Forward, Forward, [0, 1, 2], [0], [1, 0, 2, 3]),
-    )?;
-    image2.save("test2.png")?;*/
+        let bits = extract_bits_with_order_count(
+            &image,
+            &IterationOrder::new(Forward, Forward, [0, 1, 2], [0], [0, 1, 2, 3]),
+            Some(32 + 569 * 8),
+        );
+        // read 32 bits, reverse, load LE
+        let len1 = bits[0..32].to_bitvec();
+        println!("{}", len1);
+        let mut len2 = len1.clone();
+        len2.reverse();
+        println!("{} {}", len1.load_be::<u32>(), len2.load_le::<u32>());
+        let mut message_bits = bits[32..].to_bitvec();
+        message_bits.chunks_exact_mut(8).for_each(|bs| bs.reverse());
+        fs::write("test2.bytes", message_bits.as_raw_slice())?;
+    */
+
     let dir_entries = fs::read_dir("tests")?;
 
     for dir_entry in dir_entries {
