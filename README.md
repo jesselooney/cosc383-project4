@@ -6,10 +6,12 @@ To compile this project you'll need to install [Rust](https://www.rust-lang.org/
 
 # Project Architecture
 
-- `src/`
-  - `./main.rs`: The entry point for the program
-  - `./bit_pattersn.rs`: Contains the core API used to manipulate images
-  - `./detect.rs`: Contains functions used to detect modified images
-  - `./transorm.rs`: Contains useful transformations to perform on images during analysis
+- `./src/`
+  - `main.rs`: The entry point for the program
+  - `decode.rs`: Stores all of the solutions and notes we've found so far
+  - `extract.rs`: Functions to iterate over individual bits of an image and grab data
+  - `iteration_order.rs`: Helpers for iterating over pixels in different directions
+  - `extensions.rs`: Extensions to code from existing libraries we're using
+  - `helpers.rs`: Misc utility functions for use in solving images
 
 All of the files have module and function level documentation that should be read in their respective files.
