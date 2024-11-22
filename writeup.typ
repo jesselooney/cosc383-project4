@@ -23,7 +23,10 @@ This is our current codebase, and it can be found #link("https://github.com/jess
 
 = Findings
 
-Near the end of phase 1 we managed to use our tooling to successfully decode one of the sample images, and found incomplete instructions on
+
+== Sample Images
+
+Near the end of phase 1 we managed to use our tooling to successfully decode one of the sample images, and found incomplete instructions on how the telepathy trick worked.
 
 == Duplicate Images
 
