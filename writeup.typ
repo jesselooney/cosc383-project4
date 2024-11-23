@@ -19,9 +19,7 @@ After this, we decided our codebase needed some refactoring (we _are_ programmer
 
 This is our current codebase, and it can be found #link("https://github.com/jesselooney/cosc383-project4/tree/rust-refactor")[here].
 
-// TODO: I'm planning on writing more about our process for auto detection, especially with the header stuff, and pattern matching/text detection, but I'm planning on reading through more of what you wrote first.
-
-The new codebase implements many different automatic detection methods. The current methodology tries iterating over the image as many ways as possible, and then sees which ones return valid data. We check both for reasonable sounding headers, and data that looks like text.
+The new codebase implements a new, more flexible data extraction API that allows for iteration in different directions across rows and columns. Using this, we implemented many different automatic detection methods. The current methodology tries iterating over the image as many ways as possible, and then sees which ones return valid data. We check both for reasonable sounding headers, and data that looks like text.
 
 = Findings
 
@@ -43,13 +41,9 @@ Many of the images simply contained rotated or mirrored, and then downscaled, ve
 - `Spyware.png`
 - `Security.png`
 
-== XOR Message
-
-When searching inside `Ideal.png` and `Dream.png` we found two separate images that look like they were both encrypted with a 1 time pad. We XORed them together to try to begin to identify patterns with them, and found an image that looked like a bunch of stars.
-
 == Encryption Key
 
-When searching inside `Abominable.png` we found what looked like a node graph encryption key. We have yet to find what it encrypts, or whether its a public or private key, but we definitely have it.
+When searching inside `Abominable.png` we found what looked like a node graph encryption key. We have yet to find the data that it encrypts, but we know from some of the other pieces of text we found that it encrypts something that will tell us Pr0Hax0r's favorite color.
 
 == Pokemon Choosing
 

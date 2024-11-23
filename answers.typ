@@ -17,17 +17,11 @@ From images found in the LSBs of the red channel of Ideal.png and the LSBs of th
 = Does Pr0Hax0r have any good advice?
 
 Depends what you consider good advice. Decide for yourself:
-```
-"Show confidence,
-Assert dominance"
-```
-From a text found in the LSBs of and image found in the LSBs of the red channel of Lucy.png.
+- "Show confidence, Assert dominance"
+  From a text found in the LSBs of and image found in the LSBs of the red channel of Lucy.png.
 
-```
-"If anyone ever asks you, "Did you hear that?", just pause, look shocked, then walk away quickly.
-Instant mystery."
-```
-From a text found in the LSBs of the red channel of an image found in the 3rd LSBs (top-to-bottom then left-to-right) of Spyware.png.
+- "If anyone ever asks you, "Did you hear that?", just pause, look shocked, then walk away quickly. Instant mystery."
+  From a text found in the LSBs of the red channel of an image found in the 3rd LSBs (top-to-bottom then left-to-right) of Spyware.png.
 
 = Did Pr0HaX0r leave any red herrings?
 Yes. One was in the LSBs of an image found in the 2nd LSBs of Security.png.
