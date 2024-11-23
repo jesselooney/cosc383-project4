@@ -62,21 +62,30 @@ fn mod_pow(mut base: u64, mut exp: u64, modulus: u64) -> u64 {
 
 fn main() -> Result<()> {
     /*
-    if let Err(err) = write_extractions_dir("assets/sources/", "assets/extractions/") {
+    if let Err(err) = write_extractions_dir("assets/sources/", "assets/extractions3/") {
         println!("{}", err);
     }
 
-    if let Err(err) = write_extractions_dir("assets/extractions/", "assets/extractions2/") {
+    if let Err(err) = write_extractions_dir("assets/extractions3/", "assets/extractions4/") {
         println!("{}", err);
     }*/
 
     //write_amplified_dir("tests/sources/", "tests/amplified").expect("failed to amplify all");
 
-    //write_extracted_bytes(
-    //    "tests/sources/MusicToMyEars.png",
-    //    &IterationOrder::left_to_right_top_to_bottom([2], [0]),
-    //)
-    //.expect("should work");
+    /*
+    write_extracted_bytes(
+        "tests/sources/BombAnswers-extract.png",
+        &IterationOrder::left_to_right_top_to_bottom([0, 1, 2], [0]),
+    )
+    .expect("should work");*/
+
+    let bytes = fs::read("BombAnswers-extract-extract.bin")?;
+    let bits: BitVec<u8> = bytes[0..bytes.len() - 1].iter().map(|x| *x != 48).collect();
+    let bytes2: &[u8] = bits.as_raw_slice();
+    let mut bits2: BitVec<u8> = bytes2.iter().map(|x| *x != 12).collect();
+    bits2.chunks_exact_mut(8).for_each(|bs| bs.reverse());
+    let bytes3 = bits2.as_raw_slice();
+    println!("{:?}", str::from_utf8(bytes3)?);
 
     /*
         let im1: RgbImage = image::open("assets/extractions/Ideal-extract_FF_0_0_0123.png")?.into();
@@ -89,7 +98,7 @@ fn main() -> Result<()> {
 
         RgbImage::from_bitvec(im1.width(), im1.height(), bits3)?.save("xor-out.png")?;
     */
-
+    /*
     let message = [
         139986, 145697, 197229, 465230, 391098, 278252, 197229, 317115, 465230, 513217, 285941,
         38287, 145697, 197229, 345398, 513217, 465230, 260043, 285941, 513217, 14960, 213315,
@@ -124,7 +133,7 @@ fn main() -> Result<()> {
     let decrypted = message.map(|x| mod_pow(x, d, n) as u8);
     println!("{:?}", decrypted);
     let s = str::from_utf8(&decrypted)?;
-    println!("{:?}", s);
+    println!("{:?}", s);*/
     /*for double_byte in decrypted {
         bits.extend(double_byte.view_bits::<Lsb0>());
     }*/
