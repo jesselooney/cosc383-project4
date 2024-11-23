@@ -7,7 +7,8 @@ If they did as planned, they got the sock puppet on June 7th, 2023 in a "totally
 From a text found in the LSBs of the red channel of an image found in the 3rd LSBs of Acorn.png.
 
 + The other day, someone left me a surprise gift at my office door. It was a lamp! What does it mean?
-
+It is a reference to an old Korean proverb: "The darkest spot is right under the lamp." It indicates that you have been overlooking the obvious answer for who Pr0Hax0r is.
+From a text in the LSBs of the blue channel of MusicToMyEars.png, decrypted with $d = 372343$, which was found by brute force.
 
 + How does Pr0Hax0r feel about sharks?
 They do not like sharks, given the frowning face and shark images that were encrypted with the same one-time pad.
