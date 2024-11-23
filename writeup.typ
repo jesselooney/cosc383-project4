@@ -81,7 +81,6 @@ Can you take a gander at this and let me know what I should use for this year's 
 Link: https://tinyurl.com/cosc383finalf22
 
 ~SA
-[the link goes to "Ylvis - The Fox (What Does The Fox Say?) [Official music video HD]"]
 ```
 
 ```
