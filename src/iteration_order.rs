@@ -96,7 +96,7 @@ impl IterationOrder {
         }
     }
 
-    pub fn top_to_bottom_left_to_right<I, J>(channel_indices: I, bit_indices: J) -> Self
+    pub fn left_to_right_top_to_bottom<I, J>(channel_indices: I, bit_indices: J) -> Self
     where
         I: IntoIterator<Item = u32>,
         J: IntoIterator<Item = u32>,
@@ -110,7 +110,7 @@ impl IterationOrder {
         )
     }
 
-    pub fn left_to_right_top_to_bottom<I, J>(channel_indices: I, bit_indices: J) -> Self
+    pub fn top_to_bottom_left_to_right<I, J>(channel_indices: I, bit_indices: J) -> Self
     where
         I: IntoIterator<Item = u32>,
         J: IntoIterator<Item = u32>,
