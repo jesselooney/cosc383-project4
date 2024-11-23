@@ -47,7 +47,7 @@ When searching inside `Abominable.png` we found what looked like a node graph en
 
 == Pokemon Choosing
 
-While searching inside `Cookies.png` we found what looks like a Pokemon trainer looking at three Poke Balls. We don't know what this means, but it might pertain to the question about Pr0Hax0r's preferred Pokemon.
+While searching inside `Cookies.png` we found what looks like a Pokemon trainer looking at three Poke Balls. Inside of it, the red, blue, and green channels contain images of different Pokemon. If only we knew Pr0Hax0r's favorite color! 
 
 == Text
 
