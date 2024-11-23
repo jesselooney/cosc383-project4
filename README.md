@@ -11,6 +11,7 @@ To compile this project you'll need to install [Rust](https://www.rust-lang.org/
   - `decode.rs`: Stores all of the solutions and notes we've found so far
   - `extract.rs`: Functions to iterate over individual bits of an image and grab data
   - `iteration_order.rs`: Helpers for iterating over pixels in different directions
+  - `automatic.rs`: Functions that attempt to automatically parse data out of images
   - `extensions.rs`: Extensions to code from existing libraries we're using
   - `helpers.rs`: Misc utility functions for use in solving images
 
